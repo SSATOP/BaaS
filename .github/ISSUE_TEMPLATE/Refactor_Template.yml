@@ -1,0 +1,35 @@
+name: "🧹 Refactor"
+description: "리팩토링 또는 코드 개선"
+labels: ["refactor"]
+body:
+  - type: textarea
+    attributes:
+      label: 🔍 리팩토링 대상
+      description: 어떤 부분의 코드를 개선하려는지 작성해주세요.
+      placeholder: 예) UserService 구조 개선, 불필요한 의존성 제거 등
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 🎯 목표
+      description: 리팩토링의 목적이나 기대 효과를 작성해주세요.
+      placeholder: 예) 코드 가독성 향상, 유지보수성 개선 등
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: ✅ 작업할 내용
+      description: 구체적인 변경 작업을 체크박스 형태로 작성해주세요.
+      placeholder: |
+        - [ ] 불필요한 메서드 제거
+        - [ ] 메서드명 통일
+        - [ ] 유닛 테스트 추가
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 🙋🏻 참고 자료
+      description: 참고한 문서나 링크가 있다면 작성해주세요.

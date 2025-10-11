@@ -1,0 +1,38 @@
+name: "🐛 Bug"
+description: "버그 리포트"
+labels: ["bug"]
+body:
+  - type: textarea
+    attributes:
+      label: 🧩 버그 설명
+      description: 어떤 문제가 발생했는지 구체적으로 작성해주세요.
+      placeholder: 예) 로그인 시 500 에러 발생, 버튼 클릭 시 반응 없음 등
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 🔁 재현 방법
+      description: 버그를 재현할 수 있는 단계를 순서대로 적어주세요.
+      placeholder: |
+        1. 페이지 접속
+        2. 로그인 버튼 클릭
+        3. 에러 발생
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 🖥️ 환경 정보
+      description: 문제가 발생한 환경을 알려주세요.
+      placeholder: |
+        - OS: Windows 11
+        - Browser: Chrome 120.0
+        - Version: v1.0.3
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: 🧾 추가 정보
+      description: 관련 로그, 스크린샷, 참고 링크 등이 있다면 작성해주세요.
