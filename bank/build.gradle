@@ -25,17 +25,36 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	// spring boot web
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	// jwt
+	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.12.3'
+	implementation group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.12.3'
+	implementation group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.12.3'
+
+	// security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// OAuth authorization resource
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-authorization-server'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	// email sender
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+	// 이메일 발송을 위한 인증 페이지 작성 thymeleaf
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-	compileOnly 'org.projectlombok:lombok'
+
+	// DB
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'
 	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// lombok
+	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.5'
 	testImplementation 'org.springframework.security:spring-security-test'
