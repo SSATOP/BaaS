@@ -1,8 +1,11 @@
 package com.baas.bank.global.util;
 
 
+import org.springframework.stereotype.Component;
+
 import java.util.Random;
 
+@Component
 public class CodeGenerator {
 
     private static final Random RANDOM = new Random();
@@ -13,7 +16,7 @@ public class CodeGenerator {
             "U", "V", "W", "X", "Y", "Z"
     };
 
-    public static String generateCode(int length) {
+    public String generateCode(int length) {
         // 배열은 알파벳으로 구성되어있고, 랜덤으로 배열을 뽑아 6자리로 구성됩니다
         StringBuilder studyIdBuilder = new StringBuilder();
         for (int i = 0; i < length; i++) {
@@ -23,7 +26,7 @@ public class CodeGenerator {
         return studyIdBuilder.toString();
     }
 
-    public static String generateCode() {
+    public String generateCode() {
         return generateCode(6);
     }
 }
