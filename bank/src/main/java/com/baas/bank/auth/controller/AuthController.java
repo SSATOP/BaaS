@@ -21,4 +21,14 @@ public class AuthController {
         authService.send(email.getEmail());
         return ResponseEntity.ok("ok");
     }
+
+    @PostMapping("/email/verify")
+    ResponseEntity<String> verify(@RequestBody EmailVerifyReq verify) {
+        boolean verified = authService.verifyEmail(verify.getEmail(), verify.getCode());
+        if (verified) {
+            return ResponseEntity.ok("ok");
+        } else {
+            return ResponseEntity.ok("error");
+        }
+    }
 }
