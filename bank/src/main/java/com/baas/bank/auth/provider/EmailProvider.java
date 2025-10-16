@@ -1,5 +1,6 @@
 package com.baas.bank.auth.provider;
 
+import com.baas.bank.auth.entity.EmailVerify;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +44,7 @@ public class EmailProvider {
      * @return CompletableFuture<Boolean> 메일 발송 성공 시 true, 실패 시 false를 포함하는 비동기 작업 결과 객체
      */
     @Async("mailExecutor")
-    public CompletableFuture<Boolean> sendVerificationMail(String email, String code) {
+    public CompletableFuture<EmailVerify> sendVerificationMail(String email, String code) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
@@ -69,9 +70,9 @@ public class EmailProvider {
         } catch (Exception e) {
             // 메일 발송 과정에서 예외가 발생하면 로그를 기록하고, 이 비동기 작업이 실패했음을 알림
             log.error("인증 메일 발송 실패 - 수신자: {}, 에러 메시지: {}", email, e.getMessage());
-            return CompletableFuture.completedFuture(false);
+            return CompletableFuture.completedFuture(null);
         }
         // 비동기 작업이 성공했음을 알림
-        return CompletableFuture.completedFuture(true);
+        return CompletableFuture.completedFuture(new EmailVerify(email, code));
     }
 }
