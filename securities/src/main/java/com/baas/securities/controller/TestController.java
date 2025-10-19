@@ -1,0 +1,56 @@
+package com.baas.securities.controller;
+
+import com.baas.securities.dto.ResponseDTO;
+import com.baas.securities.dto.StockListDTO;
+import com.baas.securities.dto.StockListSearchCondition;
+import com.baas.securities.service.IndexHttpService;
+import com.baas.securities.service.StockHttpService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@Slf4j
+public class TestController {
+
+    private final IndexHttpService indexHttpService;
+    private final StockHttpService stockHttpService;
+
+    @GetMapping("/test/stock/index")
+    public ResponseDTO korIndex(@RequestParam String country) {
+        log.info("TestController.korIndex");
+
+        List<Object> data = null;
+
+        switch (country) {
+            case "kor" -> data = indexHttpService.getStockKorIndexList();
+            case "usa" -> data = indexHttpService.getStockUSAIndexList();
+        }
+
+        if (data == null) {
+            throw new IllegalStateException("값이 조회되지 않았습니다.");
+        }
+
+        return createResDTO(HttpStatus.OK, "조회 성공", data);
+    }
+
+    @GetMapping("/test/stock/list")
+    public ResponseDTO stockList(@ModelAttribute StockListSearchCondition condition) {
+        log.info("condition={}", condition.toString());
+        StockListDTO dto = stockHttpService.getKorStockVolumeList(condition);
+
+        return createResDTO(HttpStatus.OK, "조회 성공", dto);
+    }
+
+    private ResponseDTO createResDTO(HttpStatus status, String msg, Object data) {
+        return ResponseDTO.builder()
+                .status(status)
+                .message(msg)
+                .data(data)
+                .build();
+    }
+}
