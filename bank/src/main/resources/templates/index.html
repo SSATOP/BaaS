@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>메인 페이지</title>
+</head>
+<body>
+<nav>
+        <span th:if="${session.loginUser != null}">
+            환영합니다, <b th:text="${session.loginUser.name}"></b>님!
+            <a th:href="@{/users/logout}">로그아웃</a>
+        </span>
+  <span th:if="${session.loginUser == null}">
+            <a th:href="@{/users/login}">로그인</a> |
+            <a href="/signup.html">회원가입</a>
+        </span>
+</nav>
+
+<h1>메인 페이지 콘텐츠</h1>
+</body>
+</html>
