@@ -33,24 +33,43 @@ public class StockHttpService {
         String destUrl = baseUri + DetailUri.KOR_STOCK_VOLUME_RANK.getName() + queryString;
         log.info("destUrl={}", destUrl);
 
-        ResponseEntity<Map> response = restClient.get()
-                .uri(destUrl)
-                .headers(httpHeaders -> {
-                    httpHeaders.set("tr_id", TrId.KOR_STOCK_VOLUME_RANK.getName());
-                })
-                .retrieve()
-                .toEntity(Map.class);
+        ResponseEntity<Map> response = callKisApi(destUrl, TrId.KOR_STOCK_VOLUME_RANK.getName());
 
         List<Object> output = extractOutput(response, "output");
         List<StockInfoDTO> stockList = parseToStockDTOList(output);
 
-        return generateStockListDTO(stockList);
+        return generateStockListDTO(stockList, condition.getCategory());
     }
 
-    private StockListDTO generateStockListDTO(List<StockInfoDTO> list) {
+    public StockListDTO getKorStockCapitalizationList(StockListSearchCondition condition) {
+        String queryString = "?fid_input_price_2&fid_cond_mrkt_div_code=NX" +
+                "&fid_cond_scr_div_code=20174&fid_div_cls_code=%d&fid_input_iscd=%s".formatted(condition.getDiv(), condition.getIscd()) +
+                "&fid_trgt_cls_code=&fid_trgt_exls_cls_code=&fid_input_price_1&fid_vol_cnt";
+
+        String destUrl = baseUri + DetailUri.KOR_STOCK_MARKET_CAPITALIZATION_RANK.getName() + queryString;
+
+        ResponseEntity<Map> response = callKisApi(destUrl, TrId.KOR_STOCK_MARKET_CAPITALIZATION_RANK.getName());
+
+        List<Object> output = extractOutput(response, "output");
+        List<StockInfoDTO> stockList = parseToStockDTOList(output);
+
+        return generateStockListDTO(stockList, condition.getCategory());
+    }
+
+    private ResponseEntity<Map> callKisApi(String destUrl, String trId) {
+        return restClient.get()
+                .uri(destUrl)
+                .headers(httpHeaders -> {
+                    httpHeaders.set("tr_id", trId);
+                })
+                .retrieve()
+                .toEntity(Map.class);
+    }
+
+    private StockListDTO generateStockListDTO(List<StockInfoDTO> list, String category) {
         return StockListDTO.builder()
                 .stocks(list)
-                .category("volume")
+                .category(category)
                 .build();
     }
 

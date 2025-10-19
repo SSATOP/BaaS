@@ -42,7 +42,13 @@ public class IndexStockListController {
     @GetMapping("/list")
     public ResponseDTO stockList(@ModelAttribute StockListSearchCondition condition) {
         log.info("condition={}", condition.toString());
-        StockListDTO dto = stockHttpService.getKorStockVolumeList(condition);
+
+        StockListDTO dto = null;
+
+        switch(condition.getCategory()) {
+            case "volume" -> dto = stockHttpService.getKorStockVolumeList(condition);
+            case "capitalization" -> dto = stockHttpService.getKorStockCapitalizationList(condition);
+        }
 
         return createResDTO(HttpStatus.OK, "조회 성공", dto);
     }
