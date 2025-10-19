@@ -72,4 +72,25 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    // 로그인 API
+    @PostMapping("/login")
+    public ResponseEntity<UserLoginResponse> login(@RequestBody UserLoginRequest loginRequest) {
+        // 예외가 발생하면 GlobalExceptionHandler가 처리
+        UserDto loginUser = userService.login(loginRequest.getLoginId(), loginRequest.getLoginPassword());
+        
+        // 로그인 성공
+        UserLoginResponse response = new UserLoginResponse(
+            loginUser.getId(), 
+            loginUser.getLoginId(), 
+            loginUser.getName(), 
+            "로그인 성공"
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    // 로그아웃 API
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(){
+        return ResponseEntity.ok("로그아웃되었습니다.");
+    }
 }

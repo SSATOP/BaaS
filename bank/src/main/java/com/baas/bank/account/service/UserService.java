@@ -48,6 +48,14 @@ public class UserService {
         
         return true;
     }
+    public UserDto login(String loginId, String password){
+        UserDto user = userMapper.findByLoginId(loginId);
+        if(user != null && user.getLoginPassword().equals(password)){
+            return user;
+        }
+        throw new InvalidCredentialsException("아이디 또는 비밀번호가 올바르지 않습니다.");
+    }
+
     public UserDto findByLoginId(String loginId){
         return userMapper.findByLoginId(loginId);
     }
