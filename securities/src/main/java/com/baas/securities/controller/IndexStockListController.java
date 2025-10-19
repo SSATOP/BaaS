@@ -15,12 +15,13 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-public class TestController {
+@RequestMapping("/market")
+public class IndexStockListController {
 
     private final IndexHttpService indexHttpService;
     private final StockHttpService stockHttpService;
 
-    @GetMapping("/test/stock/index")
+    @GetMapping("/indices")
     public ResponseDTO korIndex(@RequestParam String country) {
         log.info("TestController.korIndex");
 
@@ -38,7 +39,7 @@ public class TestController {
         return createResDTO(HttpStatus.OK, "조회 성공", data);
     }
 
-    @GetMapping("/test/stock/list")
+    @GetMapping("/list")
     public ResponseDTO stockList(@ModelAttribute StockListSearchCondition condition) {
         log.info("condition={}", condition.toString());
         StockListDTO dto = stockHttpService.getKorStockVolumeList(condition);
