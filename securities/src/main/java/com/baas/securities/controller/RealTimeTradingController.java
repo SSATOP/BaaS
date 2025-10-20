@@ -3,21 +3,30 @@ package com.baas.securities.controller;
 import com.baas.securities.dto.OrderResDTO;
 import com.baas.securities.dto.ResponseDTO;
 import com.baas.securities.dto.StockOrderDTO;
+import com.baas.securities.service.KisService;
 import com.baas.securities.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
 public class RealTimeTradingController {
     private final OrderService orderService;
+    private final KisService kisService;
 
+    /**
+     *  SEC_10_11 : 매수 매도
+     */
     @MessageMapping("/stock/order")
     @SendTo("/sub/stock/order")
     public ResponseDTO order(@RequestBody StockOrderDTO dto) {
@@ -39,4 +48,14 @@ public class RealTimeTradingController {
                 .build();
     }
 
+    /**
+     * SEC-9 실시간 시세
+     * 구독 컨트롤러
+     * 구독 해지 로직은 ChanelInterceptor 에서 진행.
+     */
+    public void subRealtimeStockInfo(StompHeaderAccessor accessor, @DestinationVariable String ticker) throws IOException {
+        log.info("sub stomp: session id={}, ticker={}", accessor.getSessionId(), ticker);
+        String sessionId = accessor.getSessionId();
+        kisService.subRealtimeStock(sessionId, ticker);
+    }
 }

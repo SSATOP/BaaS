@@ -1,6 +1,9 @@
 package com.baas.securities.config;
 
+import com.baas.securities.handler.StompPreHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -8,7 +11,11 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
+@RequiredArgsConstructor
 public class StompConfig implements WebSocketMessageBrokerConfigurer {
+
+    private final StompPreHandler stompPreHandler;
+
     public void configureMessageBroker(MessageBrokerRegistry config) {
         // 구독(sub) : 접두사로 시작하는 메시지를 브로커가 처리하도록 설정합니다. 클라이언트는 이 접두사로 시작하는 주제를 구독하여 메시지를 받을 수 있습니다.
         // 예를 들어, 소켓 통신에서 사용자가 특정 메시지를 받기위해 "/sub"이라는 prefix 기반 메시지 수신을 위해 Subscribe합니다.
@@ -25,9 +32,17 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
         //addEndpoint() : 클라이언트가 WebSocket에 연결하기 위한 엔드포인트를 "/ws-stomp"로 설정합니다.
         registry.addEndpoint("ws-stomp")
                 //클라이언트의 origin을 명시적으로 지정합니다.
-                .setAllowedOrigins("http://localhost:5500","http://127.0.0.1:5500")
+                .setAllowedOrigins("http://localhost:5500", "http://127.0.0.1:5500")
                 .withSockJS();
         //WebSocket을 지원하지 않는 브라우저에서도 SockJS를 통해 WebSocket 기능을 사용할 수 있게 합니다.
 
+    }
+
+    /**
+     * stomp interceptor 추가.
+     */
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(stompPreHandler);
     }
 }
