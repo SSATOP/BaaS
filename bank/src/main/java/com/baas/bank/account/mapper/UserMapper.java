@@ -10,4 +10,5 @@ public interface UserMapper {
     UserDto findByLoginId(@Param("loginId") String loginId);
     UserDto findByLoginIdWithoutPassword(@Param("loginId") String loginId);
     UserDto findByEmail(@Param("email") String email);
+    UserDto findById(@Param("userId") Long userId);
 }
