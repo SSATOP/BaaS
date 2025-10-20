@@ -1,7 +1,7 @@
 package com.baas.bank.auth.config;
 
 import com.baas.bank.auth.dao.RefreshDAO;
-import com.baas.bank.auth.dao.UserDAO;
+import com.baas.bank.user.dao.UserDAO;
 import com.baas.bank.auth.filter.JwtAuthenticationFilter;
 import com.baas.bank.auth.filter.JwtLoginFilter;
 import com.baas.bank.auth.filter.JwtLogoutFilter;
@@ -16,8 +16,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -25,7 +23,7 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfig {
+public class JwtSecurityConfig {
     private final JwtProvider jwtProvider;
     private final TokenProperties tokenProperties;
     private final AuthenticationConfiguration authenticationConfiguration;
@@ -34,21 +32,17 @@ public class SecurityConfig {
     private final JwtService jwtService;
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws  Exception{
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
-    }
-    @Bean
-    SecurityFilterChain securityFilterChain (HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .sessionManagement((sm)->{
+                .sessionManagement((sm) -> {
                     sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
                 })
 //                .exceptionHandling(ex -> ex
@@ -57,10 +51,10 @@ public class SecurityConfig {
 //                )
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers(//back-end
-                                "/swagger-ui/**", "/auth/email/**","/auth/reissue","/users/**","/login"
+                                "/swagger-ui/**", "/auth/email/**", "/auth/reissue", "/users/**", "/login"
                         ).permitAll()
                         .requestMatchers(//front-end
-                                "/templates/**","/static/**","signup.html"
+                                "/templates/**", "/static/**", "signup.html"
                         ).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
