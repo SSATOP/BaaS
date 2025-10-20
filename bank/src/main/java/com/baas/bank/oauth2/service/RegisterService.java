@@ -1,6 +1,6 @@
 package com.baas.bank.oauth2.service;
 
-import com.baas.bank.oauth2.dto.RegisterDto;
+import com.baas.bank.oauth2.entity.RegisterEntity;
 import com.baas.bank.auth.mapper.RegisterMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,9 +17,9 @@ public class RegisterService {
     private final PasswordEncoder bCryptPasswordEncoder;
 
     // 반환 타입을 Dto로 변경
-    public RegisterDto register(RegisterDto dto) {
+    public RegisterEntity register(RegisterEntity dto) {
 
-        RegisterDto registerDto = new RegisterDto();
+        RegisterEntity registerDto = new RegisterEntity();
 
         registerDto.setId(UUID.randomUUID().toString());
         registerDto.setClientId(UUID.randomUUID().toString());

@@ -3,7 +3,7 @@
 
 <mapper namespace="com.baas.bank.auth.mapper.RegisterMapper">
 
-    <insert id="saveOrUpdate" parameterType="com.baas.bank.oauth2.dto.RegisterDto">
+    <insert id="saveOrUpdate" parameterType="com.baas.bank.oauth2.entity.RegisterEntity">
         MERGE INTO oauth2_register (
             id, clientId, clientIdIssuedAt, clientSecret, clientSecretExpiresAt,
             clientName, clientAuthenticationMethods, authorizationGrantTypes, redirectUris,
@@ -16,13 +16,13 @@
                 #{tokenSettings, jdbcType=VARCHAR})
     </insert>
 
-    <select id="findById" parameterType="string" resultType="com.baas.bank.oauth2.dto.RegisterDto">
+    <select id="findById" parameterType="string" resultType="com.baas.bank.oauth2.entity.RegisterEntity">
         SELECT *
         FROM oauth2_register
         WHERE id = #{id}
     </select>
 
-    <select id="findByClientId" parameterType="string" resultType="com.baas.bank.oauth2.dto.RegisterDto">
+    <select id="findByClientId" parameterType="string" resultType="com.baas.bank.oauth2.entity.RegisterEntity">
         SELECT *
         FROM oauth2_register
         WHERE clientId = #{clientId}

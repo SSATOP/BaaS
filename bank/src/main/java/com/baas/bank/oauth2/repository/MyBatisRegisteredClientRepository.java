@@ -1,6 +1,6 @@
 package com.baas.bank.oauth2.repository;
 
-import com.baas.bank.oauth2.dto.RegisterDto;
+import com.baas.bank.oauth2.entity.RegisterEntity;
 import com.baas.bank.auth.mapper.RegisterMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.Module;
@@ -56,7 +56,7 @@ public class MyBatisRegisteredClientRepository implements RegisteredClientReposi
                 .orElse(null);
     }
 
-    private RegisteredClient toObject(RegisterDto dto) {
+    private RegisteredClient toObject(RegisterEntity dto) {
         Set<String> clientAuthenticationMethods = StringUtils.commaDelimitedListToSet(dto.getClientAuthenticationMethods());
         Set<String> authorizationGrantTypes = StringUtils.commaDelimitedListToSet(dto.getAuthorizationGrantTypes());
         Set<String> redirectUris = StringUtils.commaDelimitedListToSet(dto.getRedirectUris());
@@ -88,7 +88,7 @@ public class MyBatisRegisteredClientRepository implements RegisteredClientReposi
         return builder.build();
     }
 
-    private RegisterDto toDto(RegisteredClient registeredClient) {
+    private RegisterEntity toDto(RegisteredClient registeredClient) {
         List<String> clientAuthenticationMethods = new ArrayList<>(registeredClient.getClientAuthenticationMethods().size());
         registeredClient.getClientAuthenticationMethods().forEach(clientAuthenticationMethod ->
                 clientAuthenticationMethods.add(clientAuthenticationMethod.getValue()));
@@ -97,7 +97,7 @@ public class MyBatisRegisteredClientRepository implements RegisteredClientReposi
         registeredClient.getAuthorizationGrantTypes().forEach(authorizationGrantType ->
                 authorizationGrantTypes.add(authorizationGrantType.getValue()));
 
-        RegisterDto dto = new RegisterDto();
+        RegisterEntity dto = new RegisterEntity();
         dto.setId(registeredClient.getId());
         dto.setClientId(registeredClient.getClientId());
         dto.setClientIdIssuedAt(registeredClient.getClientIdIssuedAt());
