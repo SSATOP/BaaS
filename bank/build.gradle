@@ -38,6 +38,7 @@ dependencies {
 
 	// OAuth authorization resource
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-authorization-server'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 
 	// email sender
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
