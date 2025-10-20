@@ -6,6 +6,7 @@ import com.baas.bank.account.exception.InvalidPasswordException;
 import com.baas.bank.account.exception.UserAlreadyExistsException;
 import com.baas.bank.account.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
     private final  UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     public void registUser(UserDto userDto){
         // 아이디 중복 체크
@@ -30,7 +32,9 @@ public class UserService {
         if(!isValidPassword(userDto.getLoginPassword())) {
             throw new InvalidPasswordException("비밀번호는 8자 이상이고 특수문자를 포함해야 합니다.");
         }
-        
+        // 비밀번호 해시 저장
+        userDto.setLoginPassword(passwordEncoder.encode(userDto.getLoginPassword()));
+
         userMapper.insertUser(userDto);
     }
     
@@ -50,7 +54,7 @@ public class UserService {
     }
     public UserDto login(String loginId, String password){
         UserDto user = userMapper.findByLoginId(loginId);
-        if(user != null && user.getLoginPassword().equals(password)){
+        if(user != null && passwordEncoder.matches(password, user.getLoginPassword())){
             return user;
         }
         throw new InvalidCredentialsException("아이디 또는 비밀번호가 올바르지 않습니다.");
