@@ -1,10 +1,10 @@
-package com.baas.bank.account.service;
+package com.baas.bank.user.service;
 
-import com.baas.bank.account.dto.UserDto;
-import com.baas.bank.account.exception.InvalidCredentialsException;
-import com.baas.bank.account.exception.InvalidPasswordException;
-import com.baas.bank.account.exception.UserAlreadyExistsException;
-import com.baas.bank.account.mapper.UserMapper;
+import com.baas.bank.user.dto.UserDto;
+import com.baas.bank.user.exception.InvalidCredentialsException;
+import com.baas.bank.user.exception.InvalidPasswordException;
+import com.baas.bank.user.exception.UserAlreadyExistsException;
+import com.baas.bank.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.extern.slf4j.Slf4j;

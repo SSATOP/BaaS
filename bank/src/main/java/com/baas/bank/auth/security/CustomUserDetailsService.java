@@ -1,7 +1,7 @@
 package com.baas.bank.auth.security;
 
-import com.baas.bank.account.dto.UserDto;
-import com.baas.bank.auth.dao.UserDAO;
+import com.baas.bank.user.dto.UserDto;
+import com.baas.bank.user.dao.UserDAO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

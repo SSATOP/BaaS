@@ -1,7 +1,7 @@
-package com.baas.bank.auth.dao;
+package com.baas.bank.user.dao;
 
-import com.baas.bank.account.dto.UserDto;
-import com.baas.bank.account.mapper.UserMapper;
+import com.baas.bank.user.dto.UserDto;
+import com.baas.bank.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

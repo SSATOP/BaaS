@@ -1,4 +1,4 @@
-package com.baas.bank.account.exception;
+package com.baas.bank.user.exception;
 
 public class UserAlreadyExistsException extends RuntimeException {
     public UserAlreadyExistsException(String message) {

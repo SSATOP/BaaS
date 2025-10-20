@@ -1,4 +1,4 @@
-package com.baas.bank.account.dto;
+package com.baas.bank.user.dto;
 
 import lombok.*;
 

@@ -1,4 +1,4 @@
-package com.baas.bank.account.exception;
+package com.baas.bank.user.exception;
 
 public class InvalidPasswordException extends RuntimeException {
     public InvalidPasswordException(String message) {

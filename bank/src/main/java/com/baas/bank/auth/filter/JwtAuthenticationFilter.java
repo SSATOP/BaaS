@@ -1,8 +1,8 @@
 package com.baas.bank.auth.filter;
 
-import com.baas.bank.account.dto.UserDto;
+import com.baas.bank.user.dto.UserDto;
 import com.baas.bank.auth.config.TokenProperties;
-import com.baas.bank.auth.dao.UserDAO;
+import com.baas.bank.user.dao.UserDAO;
 import com.baas.bank.auth.exception.JwtAuthException;
 import com.baas.bank.auth.provider.JwtProvider;
 import com.baas.bank.auth.security.CustomUserDetails;

@@ -1,13 +1,12 @@
-package com.baas.bank.account.controller;
+package com.baas.bank.user.controller;
 
-import com.baas.bank.account.dto.UserDto;
-import com.baas.bank.account.dto.UserLoginRequest;
-import com.baas.bank.account.dto.UserLoginResponse;
-import com.baas.bank.account.dto.UserSignupResponse;
-import com.baas.bank.account.service.UserService;
+import com.baas.bank.user.dto.UserDto;
+import com.baas.bank.user.dto.UserLoginRequest;
+import com.baas.bank.user.dto.UserLoginResponse;
+import com.baas.bank.user.dto.UserSignupResponse;
+import com.baas.bank.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
