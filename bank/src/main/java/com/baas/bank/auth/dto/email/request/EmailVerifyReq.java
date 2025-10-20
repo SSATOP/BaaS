@@ -1,4 +1,4 @@
-package com.baas.bank.auth.dto.request;
+package com.baas.bank.auth.dto.email.request;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

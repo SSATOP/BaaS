@@ -1,7 +1,7 @@
 package com.baas.bank.auth.controller;
 
-import com.baas.bank.auth.dto.request.EmailSendReq;
-import com.baas.bank.auth.dto.request.EmailVerifyReq;
+import com.baas.bank.auth.dto.email.request.EmailSendReq;
+import com.baas.bank.auth.dto.email.request.EmailVerifyReq;
 import com.baas.bank.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
