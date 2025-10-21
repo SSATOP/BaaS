@@ -3,19 +3,16 @@ package com.baas.securities.handler;
 import com.baas.securities.dto.RealtimeStockDTO;
 import com.baas.securities.repository.KisSocketRepository;
 import com.baas.securities.util.WebSocketMessageMaker;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -33,11 +30,13 @@ public class KisWebSocketHandler extends TextWebSocketHandler {
     private final KisSocketRepository kisRepository;
     private final WebSocketMessageMaker messageMaker;
 
-
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String kisSessionId = session.getId();
         kisRepository.setKisSession(session);
+
+        recoverKISSub(session);
+
         log.info("socket connection established, session id={}", kisSessionId);
     }
 
@@ -47,7 +46,7 @@ public class KisWebSocketHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String msg = message.getPayload();
-        log.info("receive text message={}", msg);
+//        log.info("receive text message={}", msg);
 
         /**
          * KIS 서버로부터 핑퐁 메시지를 받을때, pingpong 메시지를 kis 웹소켓 서버에게 송신
@@ -69,7 +68,7 @@ public class KisWebSocketHandler extends TextWebSocketHandler {
             List<RealtimeStockDTO> dtos = getResMessages(stockInfo);
             for (RealtimeStockDTO dto : dtos) {
                 simpMessagingTemplate.convertAndSend("/sub/stock/" + dto.getTicker(), dto);
-                log.info("dest: {}, send message: {}", "/sub/stock/" + dto.getTicker(), dto.getTicker());
+//                log.info("dest: {}, send message: {}", "/sub/stock/" + dto.getTicker(), dto.getTicker());
             }
         }
     }
@@ -81,6 +80,25 @@ public class KisWebSocketHandler extends TextWebSocketHandler {
 
         log.info("afterConnectionClosed {}", session.getId());
         log.info("close reason={}", status.getReason());
+    }
+
+    private void recoverKISSub(WebSocketSession session) throws IOException {
+        List<String> recovered = new ArrayList<>();
+
+        String approvalKey = kisRepository.getApprovalKey();
+        for (String ticker : kisRepository.getTickers()) {
+            if (kisRepository.haveSubscriber(ticker)) {
+
+                String msg = messageMaker.buildSubRequest(ticker, approvalKey);
+                session.sendMessage(new TextMessage(msg));
+
+                recovered.add(ticker);
+            }
+        }
+
+        if (!approvalKey.isEmpty()) {
+            log.info("recovered ticker subs={}", recovered);
+        }
     }
 
     private List<RealtimeStockDTO> getResMessages(String[] stockInfo) {
@@ -129,6 +147,6 @@ public class KisWebSocketHandler extends TextWebSocketHandler {
     }
 
     private boolean isPingPongMsg(String msg) {
-        return msg.contains(msg);
+        return msg.contains("PINGPONG");
     }
 }

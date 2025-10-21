@@ -3,7 +3,6 @@ package com.baas.securities.handler;
 import com.baas.securities.enums.CustomStompCommand;
 import com.baas.securities.repository.KisSocketRepository;
 import com.baas.securities.util.WebSocketMessageMaker;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,15 +21,12 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class StompPreHandler implements ChannelInterceptor {
 
-    @Value("${KIS_WEBSOCKET_APPROVAL_KEY}")
-    private String approvalKey;
-
     private final KisSocketRepository kisRepository;
     private final WebSocketMessageMaker messageMaker;
 
     /**
      * 메시지 보내기 전에 요청을 가로채는 interceptor
-     * DISCONNECT나 UNSUBSCRIBE 때에 종목에 대한 구독을 끊기 위해
+     * 실시간 주식 정보 수신 시에 stomp command가 DISCONNECT나 UNSUBSCRIBE 일때 종목에 대한 KIS 웹소켓 구독 해지
      */
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -45,29 +41,38 @@ public class StompPreHandler implements ChannelInterceptor {
          * 구독이 끝났다면 repo에서 제거
          * 종목에 대한 구독 끝 메시지 KIS에 전달.
          */
-        if (command != null && CustomStompCommand.isCloseCommand(command.name())) {
-            String ticker = kisRepository.findTickerBySessionId(sessionId)
-                    .orElseThrow(() -> new IllegalArgumentException("이미 닫힌 세션입니다."));
-            int subscriber = kisRepository.unsubTicker(ticker, sessionId);
-            try {
-                unsubscribeStock(subscriber, ticker);
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage());
-            }
+        if (isStompUnsubMsg(sessionId, command)) {
+            kisRepository.findTickerBySessionId(sessionId)
+                    .ifPresent(ticker -> {
+                        try {
+                            unsubscribeStock(ticker, sessionId);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
         }
         return ChannelInterceptor.super.preSend(message, channel);
     }
 
-    private void unsubscribeStock(int subscriber, String ticker) throws IOException {
+    private boolean isStompUnsubMsg(String sessionId, StompCommand command) {
+        return kisRepository.isStompSessionId(sessionId) && command != null && CustomStompCommand.isCloseCommand(command.name());
+    }
+
+    private void unsubscribeStock(String ticker, String sessionId) throws IOException {
+        int subscriber = kisRepository.unsubTicker(ticker, sessionId);
+
         if (subscriber > 0) {
             return;
         }
         /**
          * 만약 종목 구독자가 0명이라면 KIS 에게 종목 구독 해지 메시지 송신.
          */
+        String approvalKey = kisRepository.getApprovalKey();
+        
         String reqMsg = messageMaker.buildUnsubRequest(ticker, approvalKey);
         kisRepository.getKisSession()
                 .orElseThrow(() -> new IllegalArgumentException("웹소켓 세션을 찾지 못하였습니다."))
                 .sendMessage(new TextMessage(reqMsg));
+        log.info("unsubscribe={}", ticker);
     }
 }

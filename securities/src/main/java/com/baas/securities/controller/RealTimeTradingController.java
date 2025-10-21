@@ -53,6 +53,7 @@ public class RealTimeTradingController {
      * 구독 컨트롤러
      * 구독 해지 로직은 ChanelInterceptor 에서 진행.
      */
+    @MessageMapping("/stock/{ticker}")
     public void subRealtimeStockInfo(StompHeaderAccessor accessor, @DestinationVariable String ticker) throws IOException {
         log.info("sub stomp: session id={}, ticker={}", accessor.getSessionId(), ticker);
         String sessionId = accessor.getSessionId();
