@@ -50,6 +50,9 @@ public class StompPreHandler implements ChannelInterceptor {
                             throw new RuntimeException(e);
                         }
                     });
+
+
+
         }
         return ChannelInterceptor.super.preSend(message, channel);
     }
@@ -68,7 +71,7 @@ public class StompPreHandler implements ChannelInterceptor {
          * 만약 종목 구독자가 0명이라면 KIS 에게 종목 구독 해지 메시지 송신.
          */
         String approvalKey = kisRepository.getApprovalKey();
-        
+
         String reqMsg = messageMaker.buildUnsubRequest(ticker, approvalKey);
         kisRepository.getKisSession()
                 .orElseThrow(() -> new IllegalArgumentException("웹소켓 세션을 찾지 못하였습니다."))
