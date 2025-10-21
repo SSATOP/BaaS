@@ -56,11 +56,10 @@ public class OrderService {
         Holdings holdings = generateHoldings(dto);
         holdingsRepository.save(holdings);
         //step 6 : 보유종목 추가(dto에서 주문량 가져올지 order에서 가져올지 묻기)
-        holdings.updateQuantity(holdings.getQuantity()+dto.getQuantity());
+        holdings.updateQuantity(holdings.getQuantity() + dto.getQuantity());
 
 
         return generateOrderResDTO(order.getId(),OrderStatus.SUCCESS);
-
     }
 
     // Todo : 보유 종목에 각 회사별 주식별(종목코드별)로 총액도 관리해야하는지 논의
