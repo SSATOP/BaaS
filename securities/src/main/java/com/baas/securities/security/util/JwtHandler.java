@@ -31,7 +31,7 @@ public class JwtHandler {
                 .build();
     }
 
-    public String parse(String token) throws IllegalAccessException {
+    public String resolve(String token) throws IllegalAccessException {
         validation(token);
 
         Claims claims = Jwts.parserBuilder()
@@ -43,7 +43,7 @@ public class JwtHandler {
         return claims.getSubject();
     }
 
-    public void validation(String token) throws ExpiredJwtException, IllegalAccessException {
+    private void validation(String token) throws ExpiredJwtException, IllegalAccessException {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
