@@ -28,7 +28,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     private final KisWebSocketHandler kisHandler;
 
     @Override
-    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 
         WebSocketContainer container = new WsWebSocketContainer();
         container.setDefaultMaxTextMessageBufferSize(1_048_576);

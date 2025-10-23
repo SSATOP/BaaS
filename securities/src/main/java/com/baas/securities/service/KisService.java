@@ -51,4 +51,6 @@ public class KisService {
 
         log.info("subscribe to {}", ticker);
     }
+
+
 }
