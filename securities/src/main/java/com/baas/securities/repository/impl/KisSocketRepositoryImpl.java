@@ -17,8 +17,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Slf4j
 public class KisSocketRepositoryImpl implements KisSocketRepository {
 
-    @Value("${KIS_WEBSOCKET_APPROVAL_KEY}")
-    private String approvalKey;
+//    @Value("${KIS_WEBSOCKET_APPROVAL_KEY}")
+    private String approvalKey="faesfasdfasdf";
     /**
      * K : 세션 아이디 (스톰프 구독자 세션 아이디), V : 종목명 (Ticker)
      */

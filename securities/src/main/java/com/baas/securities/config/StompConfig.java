@@ -27,7 +27,7 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
         config.setApplicationDestinationPrefixes("/pub");
     }
 
-    @Override
+   @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         //STOMP(WebSocket 메시지 브로커 프로토콜) 엔드포인트를 등록하는 메서드로, 클라이언트가 WebSocket에 연결할 수 있는 엔드포인트를 정의합니다.
         //addEndpoint() : 클라이언트가 WebSocket에 연결하기 위한 엔드포인트를 "/ws-stomp"로 설정합니다.
@@ -42,7 +42,7 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
     /**
      * stomp interceptor 추가.
      */
-    @Override
+   @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(stompPreHandler);
     }
