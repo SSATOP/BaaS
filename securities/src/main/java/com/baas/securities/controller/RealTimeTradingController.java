@@ -35,7 +35,6 @@ public class RealTimeTradingController {
         switch (dto.getOrderType()) {
             case "BUY" -> orderResDTO = orderService.buyOrder(dto);
             case "SELL" -> orderResDTO = orderService.sellOrder(dto);
-
         }
         return generateResponseDto(HttpStatus.CREATED, "접수 완료", orderResDTO);
     }
@@ -47,8 +46,6 @@ public class RealTimeTradingController {
                 .data(orderResDTO)
                 .build();
     }
-
-
 
     /**
      * SEC-9 실시간 시세
