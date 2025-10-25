@@ -16,14 +16,14 @@ public class Account {
     private String userId;  // 사용자 아이디
     private String accountNumber;  // 계좌 번호
     private String accountPassword;// 계좌 비밀번호
-    private Long balance;        // 계좌 잔고
+    private BigDecimal balance;        // 계좌 잔고
     private boolean isActive;          // 활성 여부
     private String accountType;        // 계좌 타입
     private LocalDateTime createdAt;   // 생성일
     private LocalDateTime lastUpdate;  // 마지막 수정일
 
     @Builder
-    public Account(String userId, String accountNumber, Long balance, String accountPassword, String accountType, boolean isActive, LocalDateTime createdAt, LocalDateTime lastUpdate) {
+    public Account(String userId, String accountNumber, BigDecimal balance, String accountPassword, String accountType, boolean isActive, LocalDateTime createdAt, LocalDateTime lastUpdate) {
         this.userId = userId;
         this.accountNumber = accountNumber;
         this.balance = balance;
@@ -34,30 +34,15 @@ public class Account {
         this.lastUpdate = lastUpdate;
         id = UUID.randomUUID().toString();
     }
-    public void updateBalance(Long balance){
+
+    public void updateBalance(BigDecimal balance){
         this.balance=balance;
-
     }
 
-
-    public static Account createDummyAccount() {
-        return Account.builder()
-                .accountNumber(generateRandomAccountNumber())
-                .accountPassword(generateRandomPassword())
-                .balance((long) (Math.random() * 10_000_000))
-                .isActive(true)
-                .build();
-    }
-
-    private static String generateRandomAccountNumber() {
+    public static String generateRandomAccountNumber() {
         int part1 = (int) (Math.random() * 900) + 100;
         int part2 = (int) (Math.random() * 900) + 100;
         int part3 = (int) (Math.random() * 900000) + 100000;
         return part1 + "-" + part2 + "-" + part3;
-    }
-
-    private static String generateRandomPassword() {
-        int pw = (int) (Math.random() * 9000) + 1000;
-        return String.valueOf(pw);
     }
 }
