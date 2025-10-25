@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+/**
+ * 테스트 유저 생성 클래스
+ */
 public class JwtGetterController {
 
     private final UserRepository userRepository;
