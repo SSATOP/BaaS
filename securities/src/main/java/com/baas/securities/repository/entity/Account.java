@@ -1,9 +1,6 @@
 package com.baas.securities.repository.entity;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -11,6 +8,8 @@ import java.util.UUID;
 
 @Getter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class Account {
     private String id; // 계좌 아이디
     private String userId;  // 사용자 아이디

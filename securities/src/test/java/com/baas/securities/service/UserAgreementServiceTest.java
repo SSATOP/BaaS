@@ -22,7 +22,7 @@ class UserAgreementServiceTest {
 
     @Test
     @DisplayName("동의 정보 저장 테스트")
-    void saveTest() {
+    void saveTest() throws IllegalAccessException {
         // given
         UserAgreementReqDTO agreement = new UserAgreementReqDTO();
         agreement.setMarketing(true);

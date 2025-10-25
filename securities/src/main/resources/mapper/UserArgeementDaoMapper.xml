@@ -10,12 +10,12 @@
         where `user`.email = #{email};
     </select>
 
-    <select id="save" resultType="UserAgreement">
+    <insert id="save">
         insert into `user_agreements` (id, user_id, terms_of_service, privacy_policy, marketing, created_at)
         values (#{id}, #{userId}, #{termsOfService}, #{privacyPolicy}, #{marketing}, #{createdAt});
-    </select>
+    </insert>
 
-    <select id="update" resultType="UserAgreement">
+    <update id="update">
         update `user_agreements`
         set <if test=" termsOfService != null ">
                 terms_of_service = #{termsOfService}
@@ -29,5 +29,5 @@
                 marketing = #{marketing}
             </if>
         where id = #{id};
-    </select>
+    </update>
 </mapper>

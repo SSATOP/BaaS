@@ -1,12 +1,18 @@
 package com.baas.securities.controller;
 
 import com.baas.securities.dto.ResponseDTO;
+import com.baas.securities.dto.account.CreateAccountReqDTO;
+import com.baas.securities.dto.account.CreateAccountResDTO;
+import com.baas.securities.dto.account.FindAccountReqDTO;
+import com.baas.securities.dto.account.FindAllAccountResDTO;
 import com.baas.securities.dto.agreement.UserAgreementReqDTO;
 import com.baas.securities.dto.agreement.UserAgreementResDTO;
 import com.baas.securities.dto.security.AuthUser;
 import com.baas.securities.security.resolver.Login;
+import com.baas.securities.service.AccountService;
 import com.baas.securities.service.UserAgreementService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -14,13 +20,21 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/account")
+@RequestMapping("/api/accounts")
+/**
+ * 계좌 개설 흐름.
+ * 1. 이메일 인증 (EmailController)
+ * 2. 약관 동의 (/api/accounts/agreement)
+ * 3. 계좌 개설 (/api/accounts : POST)
+ */
 public class AccountController {
     private final UserAgreementService agreementService;
+    private final AccountService accountService;
 
     @PostMapping("/agreement")
     public ResponseDTO saveAgreement(@Login AuthUser user, @RequestBody UserAgreementReqDTO dto) throws IllegalAccessException {
         UserAgreementResDTO savedDto = agreementService.save(user, dto);
+        log.info("user={}, agreement id={}", user.getEmail(), savedDto.getAgreementId());
 
         return new ResponseDTO(HttpStatus.CREATED, "사용자 동의 정보가 생성되었습니다.", savedDto);
     }
@@ -32,5 +46,25 @@ public class AccountController {
         log.info("user={} agreement_id={}", user.getEmail(), updatedDto.getAgreementId());
 
         return new ResponseDTO(HttpStatus.OK, "사용자 동의 정보가 업데이트 되었습니다.", updatedDto);
+    }
+
+    @PostMapping
+    public ResponseDTO createAccount(@Login AuthUser user, @RequestBody CreateAccountReqDTO dto) {
+        log.info("user={}, account type={}", user.getEmail(), dto.getAccountType());
+
+        CreateAccountResDTO savedDto = accountService.createAccount(user, dto);
+        log.info("CREATE account number={}", savedDto.getAccountNumber());
+
+        return new ResponseDTO(HttpStatus.CREATED, "생성 완료", savedDto);
+    }
+
+    @GetMapping
+    public ResponseDTO findAllAccount(@Login AuthUser user) {
+        log.info("user={}", user.getEmail());
+
+        FindAllAccountResDTO resDTO = accountService.findAllByUserEmail(user);
+        log.info("user={}, accounts={}", user.getEmail(), resDTO.getAccounts().size());
+
+        return new ResponseDTO(HttpStatus.OK, "조회 성공", resDTO);
     }
 }

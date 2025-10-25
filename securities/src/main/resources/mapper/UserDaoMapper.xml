@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.baas.securities.repository.dao.UserDao">
-    <select id="save" resultType="User">
+    <insert id="save">
         insert into `users` (id, email, oauth_provider, oauth_id, name, phone_number, birth, created_at, last_login, role)
         values (#{id}, #{email}, #{oauthProvider}, #{oauthId}, #{name}, #{phoneNumber}, #{birthDate}, #{createdAt}, #{lastLogin}, #{role});
-    </select>
+    </insert>
 
     <select id="findById" resultType="User">
         select * from `users` where id=#{id};
     </select>
 
     <select id="findByEmail" resultType="User">
-        select * from `users` where email=#{email}
+        select * from `users` where email=#{email};
     </select>
 </mapper>

@@ -9,15 +9,15 @@
         select * from `email_validation` where email = #{email} order by expires_at desc limit 1;
     </select>
 
-    <select id="save" resultType="int">
+    <insert id="save">
         insert into `email_validation` (id, code, expires_at, is_verified, verified_at, email)
         values (#{id}, #{code}, #{expiresAt}, #{isVerified}, #{verifiedAt}, #{email});
-    </select>
+    </insert>
 
-    <select id="updateIsAndAtVerified" resultType="int">
+    <update id="updateIsAndAtVerified">
         update `email_validation`
         set is_verified = #{isVerified}, verified_at = #{verifiedAt}
         where id = #{id};
-    </select>
+    </update>
 
 </mapper>
