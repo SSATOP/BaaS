@@ -1,4 +1,4 @@
-package com.baas.securities.dto;
+package com.baas.securities.dto.email;
 
 import com.baas.securities.repository.entity.EmailValidation;
 import lombok.*;

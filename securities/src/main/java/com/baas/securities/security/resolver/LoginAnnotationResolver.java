@@ -1,6 +1,6 @@
 package com.baas.securities.security.resolver;
 
-import com.baas.securities.dto.AuthUser;
+import com.baas.securities.dto.security.AuthUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;

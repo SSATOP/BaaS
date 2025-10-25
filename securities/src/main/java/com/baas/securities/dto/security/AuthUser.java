@@ -1,4 +1,4 @@
-package com.baas.securities.dto;
+package com.baas.securities.dto.security;
 
 import lombok.*;
 

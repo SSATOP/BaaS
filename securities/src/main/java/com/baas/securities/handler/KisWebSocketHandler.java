@@ -1,6 +1,6 @@
 package com.baas.securities.handler;
 
-import com.baas.securities.dto.RealtimeStockDTO;
+import com.baas.securities.dto.stock.RealtimeStockDTO;
 import com.baas.securities.repository.KisSocketRepository;
 import com.baas.securities.util.WebSocketMessageMaker;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +16,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @Slf4j

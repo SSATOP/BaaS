@@ -1,6 +1,10 @@
 package com.baas.securities.controller;
 
 import com.baas.securities.dto.*;
+import com.baas.securities.dto.email.EmailValidationResDTO;
+import com.baas.securities.dto.email.EmailValidationVerifyDTO;
+import com.baas.securities.dto.email.VerifiedEmailValidationDTO;
+import com.baas.securities.dto.security.AuthUser;
 import com.baas.securities.security.resolver.Login;
 import com.baas.securities.service.MailService;
 import jakarta.mail.MessagingException;

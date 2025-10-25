@@ -1,7 +1,7 @@
 package com.baas.securities.service;
 
-import com.baas.securities.dto.OrderResDTO;
-import com.baas.securities.dto.StockOrderDTO;
+import com.baas.securities.dto.stock.OrderResDTO;
+import com.baas.securities.dto.stock.StockOrderDTO;
 import com.baas.securities.enums.OrderStatus;
 import com.baas.securities.enums.TransactionStatus;
 import com.baas.securities.enums.TransactionType;
@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

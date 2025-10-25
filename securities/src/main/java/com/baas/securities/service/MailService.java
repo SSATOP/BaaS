@@ -1,8 +1,8 @@
 package com.baas.securities.service;
 
-import com.baas.securities.dto.AuthUser;
-import com.baas.securities.dto.EmailValidationResDTO;
-import com.baas.securities.dto.VerifiedEmailValidationDTO;
+import com.baas.securities.dto.security.AuthUser;
+import com.baas.securities.dto.email.EmailValidationResDTO;
+import com.baas.securities.dto.email.VerifiedEmailValidationDTO;
 import com.baas.securities.repository.EmailValidationRepository;
 import com.baas.securities.repository.entity.EmailValidation;
 import jakarta.mail.MessagingException;

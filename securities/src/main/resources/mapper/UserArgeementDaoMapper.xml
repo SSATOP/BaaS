@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baas.securities.repository.dao.UserAgreementDao">
+    <select id="findById" resultType="UserAgreement">
+        select * from `user_agreements` from id = #{id};
+    </select>
+
+    <select id="findByEmail" resultType="UserAgreement">
+        select * from `user_agreements` from user_id = #{userId};
+    </select>
+
+    <select id="save" resultType="UserAgreement">
+        insert into `user_agreement` (id, user_id, terms_of_service, privacy_policy, marketing, created_at)
+        values (#{id}, #{userId}, #{termsOfService}, #{privacyPolicy}, #{marketing}, #{createdAt});
+    </select>
+
+    <select id="update" resultType="UserAgreement">
+        update `user_agreements`
+        set
+            <if test=" termsOfService != null ">
+                terms_of_service = #{termsOfService},
+            </if>
+            <if test=" privacyPolicy != null ">
+                privacy_policy = #{privacyPolicy},
+            </if>
+            <if test=" marketing != null ">
+                marketing = #{marketing}
+            </if>
+        from id = #{id};
+    </select>
+</mapper>

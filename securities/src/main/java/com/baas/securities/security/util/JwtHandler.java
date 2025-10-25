@@ -1,6 +1,6 @@
 package com.baas.securities.security.util;
 
-import com.baas.securities.dto.JwtDto;
+import com.baas.securities.dto.security.JwtDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;

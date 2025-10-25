@@ -1,8 +1,8 @@
 package com.baas.securities.controller;
 
-import com.baas.securities.dto.OrderResDTO;
+import com.baas.securities.dto.stock.OrderResDTO;
 import com.baas.securities.dto.ResponseDTO;
-import com.baas.securities.dto.StockOrderDTO;
+import com.baas.securities.dto.stock.StockOrderDTO;
 import com.baas.securities.service.KisService;
 import com.baas.securities.service.OrderService;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.baas.securities.controller;
 
-import com.baas.securities.dto.JwtDto;
+import com.baas.securities.dto.security.JwtDto;
 import com.baas.securities.repository.UserRepository;
 import com.baas.securities.repository.entity.User;
 import com.baas.securities.security.util.JwtHandler;

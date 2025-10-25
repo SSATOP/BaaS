@@ -1,17 +1,14 @@
 package com.baas.securities.service;
 
-import com.baas.securities.dto.EmailValidationResDTO;
-import com.baas.securities.dto.VerifiedEmailValidationDTO;
+import com.baas.securities.dto.email.EmailValidationResDTO;
+import com.baas.securities.dto.email.VerifiedEmailValidationDTO;
 import com.baas.securities.repository.EmailValidationRepository;
 import com.baas.securities.repository.entity.EmailValidation;
 import jakarta.mail.MessagingException;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class MailServiceTest {
