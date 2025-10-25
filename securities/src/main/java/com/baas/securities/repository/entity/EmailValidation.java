@@ -9,7 +9,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmailCheck {
+public class EmailValidation {
     private String id;
     private String code;
     private LocalDateTime expiredAt;
@@ -18,7 +18,7 @@ public class EmailCheck {
     private String email;
 
     @Builder
-    public EmailCheck(String code, LocalDateTime expiredAt, boolean isVerified, LocalDateTime verifiedAt, String email) {
+    public EmailValidation(String code, LocalDateTime expiredAt, boolean isVerified, LocalDateTime verifiedAt, String email) {
         this.code = code;
         this.expiredAt = expiredAt;
         this.isVerified = isVerified;
