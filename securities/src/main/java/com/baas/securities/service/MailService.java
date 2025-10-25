@@ -43,7 +43,7 @@ public class MailService {
 
     public void validate(AuthUser user, String email) {
         if (!user.getEmail().equals(email)) {
-            throw new IllegalArgumentException("가입된 이메일이 아닙니다. 확인해주세요!");
+            throw new IllegalArgumentException("사용자의 이메일과 제공된 이메일의 정보가 일치하지 않습니다. 확인해주세요!");
         }
     }
 
