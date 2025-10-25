@@ -1,13 +1,14 @@
 package com.baas.securities.service;
 
 import com.baas.securities.dto.AuthUser;
+import com.baas.securities.dto.EmailValidationResDTO;
+import com.baas.securities.dto.VerifiedEmailValidationDTO;
 import com.baas.securities.repository.EmailValidationRepository;
 import com.baas.securities.repository.entity.EmailValidation;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cglib.core.Local;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,26 +29,39 @@ public class MailService {
 
     private final int EXPIRES_TIME = 5;
 
-    public int sendMail(String mail) throws MessagingException {
+    public EmailValidationResDTO sendMail(String mail) throws MessagingException {
+        // 1. 인증코드 무작위 생성, message 생성
         int number = createNumber();
         MimeMessage message = createMail(mail, number);
 
+        // 2. EmailValidation 객체 생성
         EmailValidation emailValidation = generateEmailValidation(mail, number);
-        validationRepository.save(emailValidation);
-
+        // 3. 인증 메일 발송
         mailSender.send(message);
-        return number;
+
+        // 4. emailValidation 객체 db 저장
+        EmailValidation savedValidation = validationRepository.save(emailValidation);
+
+        // EmailValidationResDTO 객체 만들어 반환
+        return EmailValidationResDTO.generateResDTO(emailValidation);
     }
 
-    public boolean verify(String id, String code) throws IllegalArgumentException {
+    public VerifiedEmailValidationDTO verify(String id, String code) throws IllegalArgumentException {
+        // 1. 존재 여부 체크
         EmailValidation emailValidation = validationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 인증 요구입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 인증입니다."));
 
+        // 2. 인증 기간이 지났는지, 이미 인증된 코드인지, 코드가 일치하는지 체크
         verifyValidationByExpiresAt(emailValidation);
+        isVerifyAlready(emailValidation);
+
         verifyValidationByCode(emailValidation, code);
 
-        validationRepository.updateIsAndAtVerified(id, true, LocalDateTime.now());
-        return true;
+        emailValidation.verify();
+        // db 업데이트
+        validationRepository.updateIsAndAtVerified(emailValidation);
+
+        return VerifiedEmailValidationDTO.generate(emailValidation);
     }
 
     private MimeMessage createMail(String mail, int number) throws MessagingException {
@@ -100,6 +114,12 @@ public class MailService {
         LocalDateTime now = LocalDateTime.now();
         if (validation.getExpiresAt().isBefore(now)) {
             throw new IllegalArgumentException("인증 기간이 지났습니다. 다시 인증 요청 해주세요");
+        }
+    }
+
+    private void isVerifyAlready(EmailValidation validation) {
+        if (validation.isVerified()) {
+            throw new IllegalArgumentException("이미 인증된 코드입니다.");
         }
     }
 }

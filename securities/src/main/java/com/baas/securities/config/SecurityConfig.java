@@ -39,6 +39,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> { auth
                         .requestMatchers("/api/auth").permitAll()
+                        .requestMatchers("/ws-stomp").permitAll()
                         .anyRequest().authenticated();
                 });
 

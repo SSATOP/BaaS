@@ -26,4 +26,9 @@ public class EmailValidation {
         this.email = email;
         this.id = UUID.randomUUID().toString();
     }
+
+    public void verify() {
+        this.isVerified = true;
+        this.verifiedAt = LocalDateTime.now();
+    }
 }

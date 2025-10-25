@@ -10,7 +10,7 @@ public interface EmailValidationRepository {
 
     Optional<EmailValidation> findFirstByEmail(String email);
 
-    void save(EmailValidation emailCheck);
+    EmailValidation save(EmailValidation validation);
 
-    void updateIsAndAtVerified(String id, boolean isVerified, LocalDateTime verifiedAt);
+    void updateIsAndAtVerified(EmailValidation validation);
 }

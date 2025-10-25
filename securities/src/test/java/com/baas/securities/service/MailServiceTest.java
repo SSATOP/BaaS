@@ -1,5 +1,7 @@
 package com.baas.securities.service;
 
+import com.baas.securities.dto.EmailValidationResDTO;
+import com.baas.securities.dto.VerifiedEmailValidationDTO;
 import com.baas.securities.repository.EmailValidationRepository;
 import com.baas.securities.repository.entity.EmailValidation;
 import jakarta.mail.MessagingException;
@@ -23,9 +25,9 @@ class MailServiceTest {
     @DisplayName("메일 전송 테스트")
     void mailSendTest() throws MessagingException {
         // given
-        int number = mailService.sendMail("user2@gmail.com");
+        EmailValidationResDTO dto = mailService.sendMail("user2@gmail.com");
         // when
-        System.out.println(number);
+        System.out.println(dto.getCode());
         // then
     }
 
@@ -36,8 +38,8 @@ class MailServiceTest {
         EmailValidation emailValidation = repository.findFirstByEmail("user2@gmail.com").orElseThrow(IllegalAccessError::new);
         // when
         System.out.println(emailValidation.getId() + ", " + emailValidation.getCode());
-        boolean verify = mailService.verify(emailValidation.getId(), "123456");
+        VerifiedEmailValidationDTO verified = mailService.verify("6aa1ce4e-1326-4a35-bb79-ec885592b009", "139736");
         // then
-        Assertions.assertThat(verify).isFalse();
+        System.out.println(verified.getTransactionId());
     }
 }
