@@ -2,14 +2,15 @@ package com.baas.securities.repository;
 
 import com.baas.securities.repository.entity.EmailValidation;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface EmailValidationRepository {
     Optional<EmailValidation> findById(String id);
 
-    Optional<EmailValidation> findByEmail(String email);
+    Optional<EmailValidation> findFirstByEmail(String email);
 
-    int save(EmailValidation emailCheck);
+    void save(EmailValidation emailCheck);
 
-    int update(EmailValidation emailCheck);
+    void updateIsAndAtVerified(String id, boolean isVerified, LocalDateTime verifiedAt);
 }

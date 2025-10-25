@@ -12,15 +12,15 @@ import java.util.UUID;
 public class EmailValidation {
     private String id;
     private String code;
-    private LocalDateTime expiredAt;
+    private LocalDateTime expiresAt;
     private boolean isVerified;
     private LocalDateTime verifiedAt;
     private String email;
 
     @Builder
-    public EmailValidation(String code, LocalDateTime expiredAt, boolean isVerified, LocalDateTime verifiedAt, String email) {
+    public EmailValidation(String code, LocalDateTime expiresAt, boolean isVerified, LocalDateTime verifiedAt, String email) {
         this.code = code;
-        this.expiredAt = expiredAt;
+        this.expiresAt = expiresAt;
         this.isVerified = isVerified;
         this.verifiedAt = verifiedAt;
         this.email = email;

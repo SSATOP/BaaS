@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baas.securities.repository.dao.EmailValidationDao">
+    <select id="findById" resultType="EmailValidation">
+        select * from `email_validation` where id = #{id};
+    </select>
+
+    <select id="findFirstByEmail" resultType="EmailValidation">
+        select * from `email_validation` where email = #{email} order by expires_at desc limit 1;
+    </select>
+
+    <select id="save" resultType="int">
+        insert into `email_validation` (id, code, expires_at, is_verified, verified_at, email)
+        values (#{id}, #{code}, #{expiresAt}, #{isVerified}, #{verifiedAt}, #{email});
+    </select>
+
+    <select id="updateIsAndAtVerified" resultType="int">
+        update `email_validation`
+        set is_verified = #{isVerified}, verified_at = #{verifiedAt}
+        where id = #{id};
+    </select>
+
+</mapper>
