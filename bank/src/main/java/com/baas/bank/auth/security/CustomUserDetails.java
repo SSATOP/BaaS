@@ -1,6 +1,6 @@
 package com.baas.bank.auth.security;
 
-import com.baas.bank.account.dto.UserDto;
+import com.baas.bank.user.dto.UserDto;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
