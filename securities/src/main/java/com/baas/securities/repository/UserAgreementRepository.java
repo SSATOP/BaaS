@@ -7,9 +7,9 @@ import java.util.Optional;
 public interface UserAgreementRepository {
     Optional<UserAgreement> findById(String id);
 
-    Optional<UserAgreement> findByEmail(String userId);
+    Optional<UserAgreement> findByEmail(String email);
 
-    UserAgreement save(UserAgreement userAgreement);
+    void save(UserAgreement userAgreement);
 
     void update(UserAgreement userAgreement);
 }

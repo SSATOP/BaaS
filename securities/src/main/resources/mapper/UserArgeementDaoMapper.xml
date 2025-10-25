@@ -2,30 +2,32 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.baas.securities.repository.dao.UserAgreementDao">
     <select id="findById" resultType="UserAgreement">
-        select * from `user_agreements` from id = #{id};
+        select * from `user_agreements` where id = #{id};
     </select>
 
     <select id="findByEmail" resultType="UserAgreement">
-        select * from `user_agreements` from user_id = #{userId};
+        select * from `user_agreements` agree join `users` `user` on `user`.id = agree.user_id
+        where `user`.email = #{email};
     </select>
 
     <select id="save" resultType="UserAgreement">
-        insert into `user_agreement` (id, user_id, terms_of_service, privacy_policy, marketing, created_at)
+        insert into `user_agreements` (id, user_id, terms_of_service, privacy_policy, marketing, created_at)
         values (#{id}, #{userId}, #{termsOfService}, #{privacyPolicy}, #{marketing}, #{createdAt});
     </select>
 
     <select id="update" resultType="UserAgreement">
         update `user_agreements`
-        set
-            <if test=" termsOfService != null ">
-                terms_of_service = #{termsOfService},
+        set <if test=" termsOfService != null ">
+                terms_of_service = #{termsOfService}
+            <if test=" privacyPolicy != null ">, </if>
             </if>
             <if test=" privacyPolicy != null ">
-                privacy_policy = #{privacyPolicy},
+                privacy_policy = #{privacyPolicy}
+            <if test=" marketing != null ">, </if>
             </if>
             <if test=" marketing != null ">
                 marketing = #{marketing}
             </if>
-        from id = #{id};
+        where id = #{id};
     </select>
 </mapper>

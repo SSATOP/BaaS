@@ -40,7 +40,7 @@ public class MailService {
         mailSender.send(message);
 
         // 4. emailValidation 객체 db 저장
-        EmailValidation savedValidation = validationRepository.save(emailValidation);
+        validationRepository.save(emailValidation);
 
         // EmailValidationResDTO 객체 만들어 반환
         return EmailValidationResDTO.generateResDTO(emailValidation);
