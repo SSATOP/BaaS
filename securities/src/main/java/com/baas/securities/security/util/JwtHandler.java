@@ -43,6 +43,7 @@ public class JwtHandler {
         return claims.getSubject();
     }
 
+    // TODO : 예외 처리 필요.
     private void validation(String token) throws ExpiredJwtException, IllegalAccessException {
         try {
             Jwts.parserBuilder()

@@ -3,6 +3,7 @@ package com.baas.securities.repository.impl;
 import com.baas.securities.repository.KisSocketRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.socket.WebSocketSession;
@@ -15,6 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 @Repository
 @Slf4j
+@Qualifier("KisSocketRepository")
 public class KisSocketRepositoryImpl implements KisSocketRepository {
 
 //    @Value("${KIS_WEBSOCKET_APPROVAL_KEY}")

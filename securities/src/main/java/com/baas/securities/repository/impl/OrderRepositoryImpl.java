@@ -2,6 +2,7 @@ package com.baas.securities.repository.impl;
 
 import com.baas.securities.repository.OrderRepository;
 import com.baas.securities.repository.entity.Order;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
+@Qualifier("OrderRepository")
 public class OrderRepositoryImpl implements OrderRepository {
     private final Map<String, Order> store = new ConcurrentHashMap<>();
 

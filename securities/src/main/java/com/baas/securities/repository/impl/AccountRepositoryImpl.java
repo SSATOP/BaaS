@@ -4,6 +4,7 @@ import com.baas.securities.repository.AccountRepository;
 import com.baas.securities.repository.entity.Account;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
 @Slf4j
+@Qualifier("AccountRepository")
 public class AccountRepositoryImpl implements AccountRepository {
 
     private final Map<String,Account> store = new ConcurrentHashMap<>();

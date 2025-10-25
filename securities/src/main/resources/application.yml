@@ -5,3 +5,10 @@ spring:
     url: ${DATABASE_URL}
     password: ${DATABASE_PASSWORD}
     username: ${DATABASE_USERNAME}
+
+
+mybatis:
+  type-aliases-package: com.baas.securities.repository.entity
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/*.xml
