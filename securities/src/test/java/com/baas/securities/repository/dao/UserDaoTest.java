@@ -1,5 +1,6 @@
 package com.baas.securities.repository.dao;
 
+import com.baas.securities.repository.UserRepository;
 import com.baas.securities.repository.entity.User;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -16,11 +17,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-@Rollback(value = false)
 class UserDaoTest {
 
     @Autowired
-    private UserDao userDao;
+    private UserRepository userRepository;
     @Test
     @DisplayName("유저 생성 테스트")
     void userSaveTest() {
@@ -41,7 +41,7 @@ class UserDaoTest {
 
 
         // when
-        Optional<User> findUser = userDao.findByEmail(user.getEmail());
+        Optional<User> findUser = userRepository.findByEmail(user.getEmail());
 
         System.out.println(user.getId());
         // then
