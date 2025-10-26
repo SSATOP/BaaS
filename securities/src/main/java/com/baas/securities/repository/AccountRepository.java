@@ -14,4 +14,5 @@ public interface AccountRepository {
     Optional<Account> findByAccountNumber(String accountNumber);
 
     List<Account> findAllByEmail(String email);
+    void update(Account account);
 }

@@ -2,18 +2,25 @@ package com.baas.securities.service;
 
 import com.baas.securities.dto.account.*;
 import com.baas.securities.dto.security.AuthUser;
+import com.baas.securities.enums.TransactionStatus;
+import com.baas.securities.enums.TransactionType;
+import com.baas.securities.exception.InsufficientBalanceException;
 import com.baas.securities.repository.AccountRepository;
+import com.baas.securities.repository.TransactionRepository;
 import com.baas.securities.repository.UserRepository;
 import com.baas.securities.repository.entity.Account;
+import com.baas.securities.repository.entity.Transaction;
 import com.baas.securities.repository.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -23,6 +30,160 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
+    private final TransactionRepository transactionRepository;
+    private final AbstractMessageSendingTemplate abstractMessageSendingTemplate;
+
+
+    /**
+     *  송금 로직
+     */
+
+    @Transactional
+    public TransferResDTO transfer(AuthUser user, TransferReqDTO dto) throws IllegalAccessException {
+        // 1. 보내는 유저/ 계좌 확인
+        User findUser = userRepository.findByEmail(user.getEmail())
+                .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+        // todo : fromAccountNumber가 없으면 토큰 유저의 기본 계좌등을 찾는 로직 필요
+        // 요청이 있다고 가정
+        Account fromAccount = accountRepository.findByAccountNumber(dto.getFromAccountNumber())
+                .orElseThrow(() -> new IllegalArgumentException("보내는 계좌 정보를 찾을 수 없습니다."));
+
+        // 2. 본인 계좌 확인
+        isUserAccount(findUser, fromAccount);
+
+        // 3. 이체 비밀 번호 확인
+        validatePassword(fromAccount, dto.getTransferPassword());
+
+        // 4. 받는 계좌 확인
+        Account toAccount = accountRepository.findByAccountNumber(dto.getToAccountNumber())
+                .orElseThrow(() -> new IllegalArgumentException("받는 계좌 정보를 찾을 수 없습니다."));
+
+
+        // 5. 자기 자신에게 송금하는 경우 방지
+        if(fromAccount.getId().equals(toAccount.getId())){
+            throw new IllegalAccessException("자기 자신에게 송금할 수 없습니다.");
+        }
+
+        // 6. 잔액 확인
+        if (fromAccount.getBalance().compareTo(dto.getAmount()) < 0) {
+            throw new InsufficientBalanceException("출금 가능한 잔액이 부족합니다.");
+        }
+
+        // 7. 잔액 변경
+        fromAccount.updateBalance(fromAccount.getBalance().subtract(dto.getAmount()));
+        toAccount.updateBalance(toAccount.getBalance().add(dto.getAmount()));
+
+        // 8. 변경된 잔액 DB에 반영
+        accountRepository.update(fromAccount);
+        accountRepository.update(toAccount);
+
+        // 9. 거래 내역 기록 (출금, 입금 둘다)
+        saveTransferTransaction(fromAccount, toAccount, dto.getAmount());
+
+        log.info("송금 완료: {} -> {}, 금액: {}", fromAccount.getAccountNumber(), toAccount.getAccountNumber(), dto.getAmount());
+
+        // 10. 응답 DTO 반환
+        return new TransferResDTO(fromAccount.getId(), toAccount.getId(), dto.getAmount(), fromAccount.getBalance());
+
+    }
+
+    // 송금 거래 기록 저장 로직(출금.입금 트랜잭션 2개 생성)
+    private void saveTransferTransaction(Account fromAccount, Account toAccount, BigDecimal amount) {
+        // 출금 기록 (보내는 사람 기준)
+        Transaction withdrawal = Transaction.builder()
+                .accountId(fromAccount.getId())
+                .transactionType(TransactionType.WITHDRAW) // 출금 타입
+                .amount(amount.negate()) // 금액은 음수로 기록 (선택사항)
+                .status(TransactionStatus.SUCCESS)
+                .createdAt(LocalDateTime.now())
+                .completedAt(LocalDateTime.now())
+                .toAccountId(toAccount.getId()) // 상대방 계좌 ID 기록
+                // .toAccountType(toAccount.getAccountType()) // 필요하다면 타입도 기록
+                .build();
+        transactionRepository.save(withdrawal);
+
+        // 입금 기록 (받는 사람 기준)
+        Transaction deposit = Transaction.builder()
+                .accountId(toAccount.getId())
+                .transactionType(TransactionType.DEPOSIT) // 입금 타입
+                .amount(amount)
+                .status(TransactionStatus.SUCCESS)
+                .createdAt(LocalDateTime.now())
+                .completedAt(LocalDateTime.now())
+                // .fromAccountId(fromAccount.getId()) // 보낸 사람 ID 기록 (필요하다면)
+                .build();
+        transactionRepository.save(deposit);
+    }
+    /**
+     * 입출금 로직
+     */
+    public TransactionResDTO processTransaction(AuthUser user,String accountId, TransactionReqDTO dto) {
+        // 1. 유저 확인
+        User findUser = userRepository.findByEmail(user.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+        // 2. 계좌 확인
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("계좌 정보를 찾을 수 없습니다."));
+
+        // 3. 본인 계좌 확인
+        isUserAccount(findUser, account);
+
+        // 4. 트랜잭션 타입에 따라 입급 또는 출금 처리
+        // todo : 증권 계좌는 단지 입금 혹은 송금만 있는것이니 논의 필요
+        switch (dto.getTransactionType()) {
+            case WITHDRAW :
+                withdraw(account, dto.getAmount());
+                break;
+            case DEPOSIT:
+                deposit(account,dto.getAmount());
+                break;
+            default :
+                throw new IllegalArgumentException("알 수 없는 트랜잭션 타입입니다");
+
+        }
+
+        // 5. 거래 내역 기록
+        saveTransaction(account,dto.getTransactionType(),dto.getAmount());
+
+        // 6. 응답 DTO 반환
+        return new TransactionResDTO(account.getId(), account.getBalance());
+
+    }
+
+
+    // 입금 로직
+    private void deposit(Account account, BigDecimal amount) {
+        account.updateBalance(account.getBalance().add(amount));
+        accountRepository.update(account);
+        log.info("입금 완료. 계좌 ID: {}, 현재 잔액: {}", account.getId(), account.getBalance());
+    }
+
+    // 출금 로직
+    private void withdraw(Account account, BigDecimal amount) {
+        // 출금 가능 잔액 부족 예외 처리
+        if (account.getBalance().compareTo(amount) < 0) {
+            throw new InsufficientBalanceException("출금 가능한 잔액이 부족합니다.");
+        }
+        account.updateBalance(account.getBalance().subtract(amount));
+        accountRepository.update(account);
+        log.info("출금 완료. 계좌 ID: {}, 현재 잔액: {}", account.getId(), account.getBalance());
+    }
+
+    // 거래 기록 저장 로직
+    private void saveTransaction(Account account, TransactionType type, BigDecimal amount) {
+        Transaction transaction = Transaction.builder()
+                .accountId(account.getId())
+                .transactionType(type)
+                .amount(amount)
+                .status(TransactionStatus.SUCCESS)
+                .createdAt(LocalDateTime.now())
+                .completedAt(LocalDateTime.now())
+                .build();
+
+        transactionRepository.save(transaction);
+    }
 
     public CreateAccountResDTO createAccount(AuthUser user, CreateAccountReqDTO dto) {
         // 1. 유저 확인.

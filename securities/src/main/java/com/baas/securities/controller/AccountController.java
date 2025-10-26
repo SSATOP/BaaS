@@ -1,10 +1,7 @@
 package com.baas.securities.controller;
 
 import com.baas.securities.dto.ResponseDTO;
-import com.baas.securities.dto.account.CreateAccountReqDTO;
-import com.baas.securities.dto.account.CreateAccountResDTO;
-import com.baas.securities.dto.account.FindAccountReqDTO;
-import com.baas.securities.dto.account.FindAllAccountResDTO;
+import com.baas.securities.dto.account.*;
 import com.baas.securities.dto.agreement.UserAgreementReqDTO;
 import com.baas.securities.dto.agreement.UserAgreementResDTO;
 import com.baas.securities.dto.security.AuthUser;
@@ -66,5 +63,37 @@ public class AccountController {
         log.info("user={}, accounts={}", user.getEmail(), resDTO.getAccounts().size());
 
         return new ResponseDTO(HttpStatus.OK, "조회 성공", resDTO);
+    }
+
+    /**
+     * 3-4. 입금 / 출금
+     */
+
+    @PostMapping("/{accountId}/transaction")
+    public ResponseDTO processTransaction(
+            @Login AuthUser user,
+            @PathVariable String accountId,
+            @RequestBody TransactionReqDTO dto){
+        log.info("TRANSACTION user={}, accountId={}, type={}, amount={}", user.getEmail(), accountId, dto.getTransactionType(), dto.getAmount());
+        TransactionResDTO resDTO = accountService.processTransaction(user, accountId, dto);
+        return new ResponseDTO(HttpStatus.OK,"처리 완료",resDTO);
+    }
+
+    @PostMapping("/transfer")
+    public ResponseDTO transferFunds(@Login AuthUser user, @RequestBody TransferReqDTO dto) {
+        log.info("TRANSFER user={}, fromAcc={}, toAcc={}, amount={}",
+                user.getEmail(), dto.getFromAccountNumber(), dto.getToAccountNumber(), dto.getAmount());
+        try {
+            TransferResDTO resDTO = accountService.transfer(user, dto);
+            return new ResponseDTO(HttpStatus.OK, "송금이 완료되었습니다.", resDTO);
+        } catch (IllegalAccessException e) {
+            log.error("Transfer password error for user={}: {}", user.getEmail(), e.getMessage());
+            // 실제로는 ErrorCode 등을 포함한 표준 에러 응답 반환 필요
+            return new ResponseDTO(HttpStatus.BAD_REQUEST, "이체 비밀번호가 잘못되었습니다.", null);
+        } catch (IllegalArgumentException e) {
+            log.error("Transfer error for user={}: {}", user.getEmail(), e.getMessage());
+            // 실제로는 ErrorCode 등을 포함한 표준 에러 응답 반환 필요
+            return new ResponseDTO(HttpStatus.BAD_REQUEST, e.getMessage(), null);
+        }
     }
 }

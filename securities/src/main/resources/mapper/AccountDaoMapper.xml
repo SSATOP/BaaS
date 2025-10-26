@@ -10,6 +10,14 @@
         values (#{id}, #{userId}, #{accountNumber}, #{accountPassword}, #{balance}, #{isActive}, #{accountType}, #{createdAt}, #{lastUpdate});
     </insert>
 
+    <update id="update" parameterType="com.baas.securities.repository.entity.Account">
+        UPDATE accounts
+        SET
+            balance = #{balance},
+            last_update = NOW() -- 현재 시간으로 업데이트
+        WHERE
+            id = #{id}
+    </update>
     <select id="findByAccountNumber" resultType="Account">
         select * from `accounts` where account_number = #{accountNumber};
     </select>

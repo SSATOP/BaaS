@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baas.securities.repository.dao.TransactionDao">
+
+    <insert id="insert" parameterType="com.baas.securities.repository.entity.Transaction">
+        INSERT INTO transactions (
+            id, account_id, transaction_type, amount, status,
+            created_at, completed_at, order_id, fail_reason,
+            to_account_id, to_account_type
+        ) VALUES (
+                     #{id}, #{accountId}, #{transactionType}, #{amount}, #{status},
+                     #{createdAt}, #{completedAt}, #{orderId}, #{failReason},
+                     #{toAccountId}, #{toAccountType}
+                 )
+    </insert>
+
+</mapper>
