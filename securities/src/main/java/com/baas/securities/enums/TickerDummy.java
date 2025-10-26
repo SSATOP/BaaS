@@ -15,7 +15,6 @@ public enum TickerDummy {
     public static TickerDummy getCode(String name){
         for(TickerDummy t : TickerDummy.values()){
             if(t.getName().equals(name)){
-
                 return t;
             }
         }

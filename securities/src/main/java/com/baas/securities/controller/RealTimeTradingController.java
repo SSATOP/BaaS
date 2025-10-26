@@ -58,4 +58,6 @@ public class RealTimeTradingController {
         String sessionId = accessor.getSessionId();
         kisService.subRealtimeStock(sessionId, ticker);
     }
+
+    // SEC-9 TODO : 해외주식 realtime
 }

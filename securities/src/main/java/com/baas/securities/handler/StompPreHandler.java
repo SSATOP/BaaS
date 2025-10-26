@@ -50,9 +50,6 @@ public class StompPreHandler implements ChannelInterceptor {
                             throw new RuntimeException(e);
                         }
                     });
-
-
-
         }
         return ChannelInterceptor.super.preSend(message, channel);
     }
