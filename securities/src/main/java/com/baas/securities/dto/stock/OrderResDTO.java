@@ -1,9 +1,8 @@
-package com.baas.securities.dto;
+package com.baas.securities.dto.stock;
 
 
 import com.baas.securities.enums.OrderStatus;
 import lombok.*;
-import java.util.UUID;
 
 @Getter
 @Setter

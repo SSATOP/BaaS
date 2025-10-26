@@ -2,6 +2,7 @@ package com.baas.securities.repository.impl;
 
 import com.baas.securities.repository.TransactionRepository;
 import com.baas.securities.repository.entity.Transaction;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
+@Qualifier("TransactionRepository")
 public class TransactionRepositoryImpl implements TransactionRepository {
 
     private final Map<String, Transaction> store = new ConcurrentHashMap<>();

@@ -2,6 +2,7 @@ package com.baas.securities.repository.impl;
 
 import com.baas.securities.repository.HoldingsRepository;
 import com.baas.securities.repository.entity.Holdings;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
+@Qualifier("HoldingsRepository")
 public class HoldingsRepositoryImpl implements HoldingsRepository {
     private final Map<String, Holdings> store = new ConcurrentHashMap<>();
 

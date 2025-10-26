@@ -1,7 +1,7 @@
 package com.baas.securities.service;
 
-import com.baas.securities.dto.OrderResDTO;
-import com.baas.securities.dto.StockOrderDTO;
+import com.baas.securities.dto.stock.OrderResDTO;
+import com.baas.securities.dto.stock.StockOrderDTO;
 import com.baas.securities.enums.OrderStatus;
 import com.baas.securities.enums.TransactionStatus;
 import com.baas.securities.enums.TransactionType;
@@ -13,8 +13,8 @@ import com.baas.securities.repository.entity.Transaction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +35,6 @@ public class OrderService {
         // 빈 객체일시 예외를 던짐
         Account account = accountRepository.findById(accountId).orElseThrow(() -> new IllegalArgumentException("잘못된 토큰입니다."));
 
-
         // step2-1. 주문 가능 확인
         // step2-2. 주문 오류-> 거래 생성 불가
         if(invalidateBalance(account,dto)){
@@ -50,7 +49,7 @@ public class OrderService {
         order.updateOrderStatus(OrderStatus.SUCCESS,null);
         transactionRepository.save(transaction);
         // step5. 계좌금액 차감
-        account.updateBalance(account.getBalance()-(long)transaction.getAmount().doubleValue());
+        account.updateBalance(account.getBalance().subtract(transaction.getAmount()));
 
         // step6: 보유종목 생성 ?? 생성으로 해야할지 추가로 해야할지
         Holdings holdings = generateHoldings(dto);
@@ -89,7 +88,7 @@ public class OrderService {
         order.updateOrderStatus(OrderStatus.SUCCESS,null);
         transactionRepository.save(transaction);
         //step5. 계좌 금액 증가
-        account.updateBalance(account.getBalance()+(long)transaction.getAmount().doubleValue());
+        account.updateBalance(account.getBalance().add(transaction.getAmount()));
 
         //step 7 : 보유종목 감소(dto에서 주문량 가져올지 order에서 가져올지 묻기)
 
@@ -131,8 +130,10 @@ public class OrderService {
         return dto.getQuantity() * dto.getPrice();
     }
 
-    private boolean invalidateBalance(Account account,StockOrderDTO dto){
-        return account.getBalance() < dto.getQuantity() * dto.getPrice();
+    private boolean invalidateBalance(Account account, StockOrderDTO dto) {
+        BigDecimal inputPrice = new BigDecimal(Double.toString(dto.getQuantity() * dto.getPrice()));
+        // 0은 동일, 1 은 많음, -1은 적음
+        return account.getBalance().compareTo(inputPrice) < 0;
 
     }
 
@@ -145,7 +146,7 @@ public class OrderService {
         return Transaction.builder()
                 .accountId(account.getId())
                 .orderId(order.getId())
-                .amount(order.getTotalAmount())
+                .amount(new BigDecimal(String.valueOf(order.getTotalAmount())))
                 .transactionType(transactionType)
                 .createdAt(LocalDateTime.now())
                 .completedAt(LocalDateTime.now())

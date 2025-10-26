@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -16,7 +17,7 @@ public class Transaction {
     private String orderId;           // 주문 아이디
     private String accountId;         // 계좌 아이디
     private TransactionType transactionType;   // 거래 종류
-    private Double amount;              // 금액
+    private BigDecimal amount;              // 금액
     private TransactionStatus status;            // 상태
     private String failReason;        // 실패 이유
     private LocalDateTime createdAt;  // 생성일
@@ -25,7 +26,7 @@ public class Transaction {
     private String toAccountType;     // 송금 목표 계좌 유형
 
     @Builder
-    public Transaction(String orderId, String accountId, TransactionType transactionType, Double amount, TransactionStatus status, String failReason, LocalDateTime createdAt, LocalDateTime completedAt, String toAccountId, String toAccountType) {
+    public Transaction(String orderId, String accountId, TransactionType transactionType, BigDecimal amount, TransactionStatus status, String failReason, LocalDateTime createdAt, LocalDateTime completedAt, String toAccountId, String toAccountType) {
         this.orderId = orderId;
         this.accountId = accountId;
         this.transactionType = transactionType;
