@@ -1,7 +1,8 @@
 package com.baas.securities.enums;
 
 public enum TransactionType {
-    BUY("매수"),SELL("매도"),SEND("송금"),DEPOSIT("입금");
+    //send 삭제 송금 개념은 각자 계좌 입장에서 입금이고 출금인거니까
+    BUY("매수"),SELL("매도"),DEPOSIT("입금"),WITHDRAW("출금");
 
     private String name;
 

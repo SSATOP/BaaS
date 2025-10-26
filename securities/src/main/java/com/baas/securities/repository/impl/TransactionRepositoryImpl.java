@@ -1,7 +1,9 @@
 package com.baas.securities.repository.impl;
 
 import com.baas.securities.repository.TransactionRepository;
+import com.baas.securities.repository.dao.TransactionDao;
 import com.baas.securities.repository.entity.Transaction;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
@@ -12,18 +14,20 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
 @Qualifier("TransactionRepository")
+@RequiredArgsConstructor
 public class TransactionRepositoryImpl implements TransactionRepository {
 
-    private final Map<String, Transaction> store = new ConcurrentHashMap<>();
-
+    //private final Map<String, Transaction> store = new ConcurrentHashMap<>();
+    private final TransactionDao transactionDao; // 5. DAO 주입받기
     @Override
     public Optional<Transaction> findById(String id) {
-        Transaction transaction = store.get(id);
-        return Optional.of(transaction);
+        return Optional.ofNullable(transactionDao.findById(id));
+
     }
 
     @Override
     public void save(Transaction transaction) {
-        store.put(transaction.getId(),transaction);
+
+        transactionDao.insert(transaction); // DB에 INSERT 실행
     }
 }
