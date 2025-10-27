@@ -30,6 +30,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (invalidURL(requestURI)) {
             filterChain.doFilter(request, response);
+            log.info("not need valid={}", requestURI);
             return;
         }
 
