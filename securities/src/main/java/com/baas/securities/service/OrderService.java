@@ -31,7 +31,7 @@ public class OrderService {
     // Todo : 주문에서 종목 코드 별로 관리를 하여서 보유종목에 추가 하는 절차 필요
     public OrderResDTO buyOrder(StockOrderDTO dto){
         // step1. 계좌 확인
-        String accountId  =dto.getAccountId();
+        String accountId  = dto.getAccountId();
         // 빈 객체일시 예외를 던짐
         Account account = accountRepository.findById(accountId).orElseThrow(() -> new IllegalArgumentException("잘못된 토큰입니다."));
 

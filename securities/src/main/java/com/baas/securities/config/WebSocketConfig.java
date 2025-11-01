@@ -1,7 +1,7 @@
 package com.baas.securities.config;
 
-import com.baas.securities.handler.KisWebSocketConnectionManager;
-import com.baas.securities.handler.KisWebSocketHandler;
+import com.baas.securities.ws.KisWebSocketConnectionManager;
+import com.baas.securities.ws.KisWebSocketHandler;
 import jakarta.websocket.WebSocketContainer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-
         WebSocketContainer container = new WsWebSocketContainer();
         container.setDefaultMaxTextMessageBufferSize(1_048_576);
         container.setDefaultMaxBinaryMessageBufferSize(1_048_576);

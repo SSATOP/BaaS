@@ -1,6 +1,7 @@
 package com.baas.securities.config;
 
 import com.baas.securities.security.resolver.LoginAnnotationResolver;
+import com.baas.securities.security.resolver.StompLoginAnnotationResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
