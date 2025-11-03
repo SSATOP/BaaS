@@ -19,38 +19,63 @@ public class KisService {
     private final KisSocketRepository kisRepository;
     private final WebSocketMessageMaker messageMaker;
 
-    public void subRealtimeStock(String sessionId, String ticker) throws IOException {
-        /**
-         * 종목에 대한 구독이 없으면 KIS 서버에 구독 메시지 전송
-         */
-        log.info("ticker: {}, have subscriber={}", ticker, kisRepository.haveSubscriber(ticker));
+    /**
+     *
+     * KIS 서버에 실제 '구독' 메시지를 전송
+     * @param ticker 종목 코드
+     */
+    public void subscribeToStock(String ticker) throws IOException {
+        String approvalKey = kisRepository.getApprovalKey();
 
-        if (!kisRepository.haveSubscriber(ticker)) {
-            sendRequestMsg(ticker);
-        }
-        /**
-         * 종목에 대한 구독 세션 아이디 저장
-         */
-        kisRepository.subTicker(ticker, sessionId);
+        // (중요) messageMaker에 buildSubRequest가 있어야 합니다.
+        String reqMsg = messageMaker.buildSubRequest(ticker, approvalKey);
+
+        log.info("KIS 구독 메시지 전송: {}, {}", ticker, reqMsg);
+
+        kisRepository.getKisSession()
+                .orElseThrow(() -> new IllegalArgumentException("KIS 웹소켓이 연결되어있지 않습니다."))
+                .sendMessage(new TextMessage(reqMsg));
+
+        log.info("KIS 구독 요청 완료: {}", ticker);
     }
 
     /**
-     * unsubRealtimeStock(구독해지)은 Interceptor에서 Repository로 진행
+     * KIS 서버에 실제 '구독 해지' 메시지를 전송합니다.
+     * @param ticker 종목 코드
      */
-
-    private void sendRequestMsg(String ticker) throws IOException {
-        // TODO : Session Error Handling
+    public void unsubscribeFromStock(String ticker) throws IOException {
         String approvalKey = kisRepository.getApprovalKey();
-        String reqMsg = messageMaker.buildSubRequest(ticker, approvalKey);
 
-        log.info("sub msg to {}, {}", ticker, reqMsg);
+        // (중요) messageMaker에 '구독 해지' 메시지를 만드는 메소드가 필요합니다.
+        //       (이름은 예시입니다: buildUnsubRequest)
+        String reqMsg = messageMaker.buildUnsubRequest(ticker, approvalKey);
+
+        log.info("KIS 구독 해지 메시지 전송: {}, {}", ticker, reqMsg);
 
         kisRepository.getKisSession()
-                .orElseThrow(() -> new IllegalArgumentException("웹소켓이 연결되어있지 않습니다."))
+                .orElseThrow(() -> new IllegalArgumentException("KIS 웹소켓이 연결되어있지 않습니다."))
                 .sendMessage(new TextMessage(reqMsg));
 
-        log.info("subscribe to {}", ticker);
+        log.info("KIS 구독 해지 요청 완료: {}", ticker);
     }
 
+    /**
+     * [KisScheduler가 호출]
+     * KIS API를 직접 호출하여 새 Approval Key를 발급받아 반환합니다.
+     * @return 새로 발급받은 KIS 승인 키 (String)
+     * @throws Exception API 호출 실패 시
+     */
+    public String fetchNewApprovalKeyFromKisApi() throws Exception {
+        log.info("KIS API에 새 승인 키 발급을 요청합니다...");
+
+        // TODO: (이전 설명과 동일)
+        // KIS '승인 키 발급' API 실제 호출 로직 구현...
+        // (RestTemplate 또는 WebClient 사용)
+
+        // (임시 반환값) -> 위 TODO를 실제 로직으로 교체해야 함
+        String temporaryNewKey = "temp_new_key_from_api_call_" + System.currentTimeMillis();
+        log.info("임시 새 키 발급: {}", temporaryNewKey);
+        return temporaryNewKey;
+    }
 
 }

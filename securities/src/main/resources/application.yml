@@ -21,6 +21,11 @@ spring:
           auth: true
           starttls:
             enable: true
+  ## 레디스 설정
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 
 mybatis:

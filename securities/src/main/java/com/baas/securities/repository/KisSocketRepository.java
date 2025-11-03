@@ -11,7 +11,7 @@ import java.util.Set;
  */
 
 public interface KisSocketRepository {
-    void subTicker(String ticker, String sessionId);
+    int subTicker(String ticker, String sessionId);
 
     boolean haveSubscriber(String ticker);
 
@@ -30,4 +30,6 @@ public interface KisSocketRepository {
     Set<String> getTickers();
 
     String getApprovalKey();
+
+    void updateApprovalKey(String newApprovalKey);
 }
