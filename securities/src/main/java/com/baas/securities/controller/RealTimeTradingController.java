@@ -1,5 +1,6 @@
 package com.baas.securities.controller;
 
+import com.baas.securities.dto.AccIdUserIdInfoDTO;
 import com.baas.securities.dto.security.AuthUser;
 import com.baas.securities.dto.stock.OrderResDTO;
 import com.baas.securities.dto.ResponseDTO;
@@ -46,12 +47,13 @@ public class RealTimeTradingController {
         String email = user.getEmail();
         log.info("user = {}, sessionId={}", email, sessionId);
 
-        accountService.validateAccountByEmailAndAccountNumber(email, dto.getAccountNumber());
+        AccIdUserIdInfoDTO infoDto = accountService.validateAccountByEmailAndAccountNumber(email, dto.getAccountNumber());
 
         OrderResDTO orderResDTO = null;
+
         switch (dto.getOrderType()) {
-            case "BUY" -> orderResDTO = orderService.buyOrder(dto);
-            case "SELL" -> orderResDTO = orderService.sellOrder(dto);
+            case "BUY" -> orderResDTO = orderService.buyOrder(dto, infoDto);
+            case "SELL" -> orderResDTO = orderService.sellOrder(dto, infoDto);
         }
 
         return generateResponseDto(HttpStatus.CREATED, "접수 완료", orderResDTO);

@@ -1,5 +1,6 @@
 package com.baas.securities.service;
 
+import com.baas.securities.dto.AccIdUserIdInfoDTO;
 import com.baas.securities.dto.stock.StockOrderDTO;
 import com.baas.securities.enums.OrderStatus;
 import com.baas.securities.enums.TickerDummy;
@@ -40,10 +41,12 @@ class OrderServiceTest {
         dto.setCurrentType("원화");
         dto.setAccountNumber("867-859-577865");
 
+        AccIdUserIdInfoDTO infoDto = new AccIdUserIdInfoDTO("3cd332f7-df2c-4e49-a315-2cd3ee71c6d3", "0a5718b5-e040-48f1-977a-ce33c36314cd");
 
         // when
-        orderService.buyOrder(dto);
+        orderService.buyOrder(dto, infoDto);
         // then
+
     }
 
 }
