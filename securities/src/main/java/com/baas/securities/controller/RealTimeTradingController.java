@@ -5,6 +5,7 @@ import com.baas.securities.dto.stock.OrderResDTO;
 import com.baas.securities.dto.ResponseDTO;
 import com.baas.securities.dto.stock.StockOrderDTO;
 import com.baas.securities.security.resolver.Login;
+import com.baas.securities.service.AccountService;
 import com.baas.securities.service.KisService;
 import com.baas.securities.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,8 @@ public class RealTimeTradingController {
     private final OrderService orderService;
     private final KisService kisService;
 
+    private final AccountService accountService;
+
     /**
      * SEC_10_11 : 매수 매도
      */
@@ -42,6 +45,8 @@ public class RealTimeTradingController {
         // Todo : 요청한 사용자와 계좌가 일치하는지 절차 필요
         String email = user.getEmail();
         log.info("user = {}, sessionId={}", email, sessionId);
+
+        accountService.validateAccountByEmailAndAccountNumber(email, dto.getAccountNumber());
 
         OrderResDTO orderResDTO = null;
         switch (dto.getOrderType()) {

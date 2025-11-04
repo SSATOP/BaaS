@@ -152,6 +152,11 @@ public class AccountService {
 
     }
 
+    public void validateAccountByEmailAndAccountNumber(String email, String accountNumber) {
+        accountRepository.findByEmailAndAccountNumber(email, accountNumber)
+                .orElseThrow(() -> new IllegalArgumentException("유저가 가지고 있지 않는 계좌입니다."));
+    }
+
 
     // 입금 로직
     private void deposit(Account account, BigDecimal amount) {

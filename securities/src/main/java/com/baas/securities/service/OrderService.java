@@ -12,12 +12,14 @@ import com.baas.securities.repository.entity.Order;
 import com.baas.securities.repository.entity.Transaction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class OrderService {
 
     private final AccountRepository accountRepository;
@@ -31,9 +33,9 @@ public class OrderService {
     // Todo : 주문에서 종목 코드 별로 관리를 하여서 보유종목에 추가 하는 절차 필요
     public OrderResDTO buyOrder(StockOrderDTO dto){
         // step1. 계좌 확인
-        String accountId  = dto.getAccountId();
+        String accountNumber  = dto.getAccountNumber();
         // 빈 객체일시 예외를 던짐
-        Account account = accountRepository.findById(accountId).orElseThrow(() -> new IllegalArgumentException("잘못된 토큰입니다."));
+        Account account = accountRepository.findByAccountNumber(accountNumber).orElseThrow(() -> new IllegalArgumentException("잘못된 토큰입니다."));
 
         // step2-1. 주문 가능 확인
         // step2-2. 주문 오류-> 거래 생성 불가
@@ -41,22 +43,24 @@ public class OrderService {
             throw new IllegalArgumentException("잔액 부족");
         }
         // step3. 주문 생성
-        Order order = generateOrder(dto);
-        orderRepository.save(order);
+        Order order = generateOrder(account, dto);
+//        orderRepository.save(order); // mybatis 땐 모든 수정사항 후에 save
 
         // step4. 거래 생성
         Transaction transaction = generateTransaction(account, order,TransactionType.BUY);
         order.updateOrderStatus(OrderStatus.SUCCESS,null);
+
+        orderRepository.save(order); // mybatis 땐 모든 수정사항 후에 save
         transactionRepository.save(transaction);
         // step5. 계좌금액 차감
         account.updateBalance(account.getBalance().subtract(transaction.getAmount()));
 
         // step6: 보유종목 생성 ?? 생성으로 해야할지 추가로 해야할지
         Holdings holdings = generateHoldings(dto);
-        holdingsRepository.save(holdings);
+//        holdingsRepository.save(holdings); // mybatis 땐 모든 수정사항 후에 save
         //step 6 : 보유종목 추가(dto에서 주문량 가져올지 order에서 가져올지 묻기)
         holdings.updateQuantity(holdings.getQuantity() + dto.getQuantity());
-
+        holdingsRepository.save(holdings); // mybatis 땐 모든 수정사항 후에 save
 
         return generateOrderResDTO(order.getId(),OrderStatus.SUCCESS);
     }
@@ -65,12 +69,12 @@ public class OrderService {
     public OrderResDTO sellOrder(StockOrderDTO dto){
 
         // step1. 계좌 확인
-        String accountId  =dto.getAccountId();
+        String accountNumber  = dto.getAccountNumber();
         // 빈 객체일시 예외를 던짐
-        Account account = accountRepository.findById(accountId).orElseThrow(() -> new IllegalArgumentException("잘못된 토큰입니다."));
+        Account account = accountRepository.findByAccountNumber(accountNumber).orElseThrow(() -> new IllegalArgumentException("잘못된 토큰입니다."));
 
         // step3: 보유종목 생성 -> 생성이 아니라 찾는걸로
-        Holdings holdings = holdingsRepository.findByUserIdAndTicker(dto.getAccountId(), dto.getTicker())
+        Holdings holdings = holdingsRepository.findByUserIdAndTicker(account.getId(), dto.getTicker())
                 .orElseThrow(() -> new IllegalArgumentException("보유하지 않은 종목입니다."));
 
         // step4-1.주문 수량 확인
@@ -80,7 +84,7 @@ public class OrderService {
         }
 
         // step2. 주문 생성
-        Order order = generateOrder(dto);
+        Order order = generateOrder(account, dto);
         orderRepository.save(order);
 
         // step4. 거래 생성
@@ -112,9 +116,10 @@ public class OrderService {
                 .lastUpdated(LocalDateTime.now())
                 .build();
     }
-    private Order generateOrder(StockOrderDTO dto){
+
+    private Order generateOrder(Account account, StockOrderDTO dto){
         return Order.builder()
-                .accountId(dto.getAccountId())
+                .accountId(account.getId())
                 .price(dto.getPrice())
                 .orderType(dto.getOrderType())
                 .orderStatus(OrderStatus.SUCCESS)
@@ -134,7 +139,6 @@ public class OrderService {
         BigDecimal inputPrice = new BigDecimal(Double.toString(dto.getQuantity() * dto.getPrice()));
         // 0은 동일, 1 은 많음, -1은 적음
         return account.getBalance().compareTo(inputPrice) < 0;
-
     }
 
     // todo : 종목코드별로 관리 추가 필요
