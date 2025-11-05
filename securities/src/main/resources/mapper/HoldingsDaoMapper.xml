@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baas.securities.repository.dao.HoldingsDao">
+    <select id="findById" resultType="Holdings">
+        select * from holdings where id = #{id};
+    </select>
+
+    <insert id="save">
+        insert into holdings (id, symbol, user_id, quantity, avg_price, profit_loss, last_updated)
+            values (#{id}, #{symbol}, #{userId}, #{quantity}, #{avgPrice}, #{profitLoss} ,#{lastUpdated})
+        on duplicate key update
+        quantity = #{quantity},
+        avg_price = #{avgPrice},
+        profit_loss =  #{profitLoss},
+        last_updated = #{lastUpdated};
+    </insert>
+
+    <select id="findByUserIdAndTicker" resultType="Holdings">
+        select id, symbol, user_id, quantity, avg_price, profit_loss, last_updated
+        from holdings
+        where symbol = #{ticker} and user_id = #{userId};
+    </select>
+
+    <delete id="deleteById">
+        delete from holdings
+        where id = #{id};
+    </delete>
+</mapper>

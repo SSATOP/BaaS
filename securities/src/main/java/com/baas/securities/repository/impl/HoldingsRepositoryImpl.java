@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Repository
-@Qualifier("HoldingsRepository")
+//@Repository
+//@Qualifier("HoldingsRepository")
 public class HoldingsRepositoryImpl implements HoldingsRepository {
     private final Map<String, Holdings> store = new ConcurrentHashMap<>();
 
