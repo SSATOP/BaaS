@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baas.securities.repository.dao.AccountDao">
+    <select id="findById" resultType="Account">
+        select * from `accounts` where id = #{id};
+    </select>
+
+    <insert id="save">
+        insert into `accounts` (id, user_id, account_number, account_password, balance, is_active, account_type, created_at, last_update)
+        values (#{id}, #{userId}, #{accountNumber}, #{accountPassword}, #{balance}, #{isActive}, #{accountType}, #{createdAt}, #{lastUpdate});
+    </insert>
+
+    <update id="update" parameterType="com.baas.securities.repository.entity.Account">
+        UPDATE accounts
+        SET
+            balance = #{balance},
+            last_update = NOW() -- 현재 시간으로 업데이트
+        WHERE
+            id = #{id}
+    </update>
+    <select id="findByAccountNumber" resultType="Account">
+        select * from `accounts` where account_number = #{accountNumber};
+    </select>
+
+    <select id="findAllByEmail" resultMap="accountResultMap">
+        select acc.* from `accounts` acc join `users` u on acc.user_id = u.id
+        where u.email = #{email};
+    </select>
+
+    <select id="findByEmailAndAccountNumber" resultType="Account">
+        select * from `accounts` acc join `users` usr on acc.user_id = usr.id
+        where account_number = #{accountNumber} and email = #{email};
+    </select>
+
+    <resultMap id="accountResultMap" type="Account">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="account_number" property="accountNumber"/>
+        <result column="account_password" property="accountPassword"/>
+        <result column="balance" property="balance"/>
+        <result column="is_active" property="isActive"/>
+        <result column="account_type" property="accountType"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="last_update" property="lastUpdate"/>
+    </resultMap>
+</mapper>

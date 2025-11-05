@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baas.securities.repository.dao.SymbolDao">
+    <insert id="save">
+        insert into `symbols` (symbol, name, market, isin, sector, industry, listed_at)
+        values (#{symbol}, #{name}, #{market}, #{isin}, #{sector}, #{industry}, #{listed_at});
+    </insert>
+
+    <select id="findBySymbol" resultType="Symbol">
+        select * from `symbols` where symbol = #{symbol};
+    </select>
+</mapper>

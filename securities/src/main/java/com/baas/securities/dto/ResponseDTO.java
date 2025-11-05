@@ -1,9 +1,10 @@
 package com.baas.securities.dto;
-
 import lombok.*;
 import org.springframework.http.HttpStatus;
 
-import java.util.List;
+
+// 주문 증권계좌 거래
+
 
 @Setter
 @Getter
