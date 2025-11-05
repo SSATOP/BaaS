@@ -13,8 +13,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,7 +36,6 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
     private final JwtService jwtService;
-
     private final RefreshDAO refreshDAO;
     private final UserDAO userDAO;
 
@@ -45,42 +46,61 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
      */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        try {
-            // JSON 요청 바디 파싱
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, String> loginData = objectMapper.readValue(request.getInputStream(), Map.class);
-            System.out.println(loginData);
-            String loginId = loginData.get("loginId");
-            String loginPassword = loginData.get("loginPassword");
-            if (loginId == null || loginPassword == null) {
-                request.setAttribute("exception", EMPTY_EMAIL_OR_PASSWORD);
-                throw new JwtAuthException(EMPTY_EMAIL_OR_PASSWORD);
+        String loginId;
+        String loginPassword;
+        // 요청 Content-Type 확인
+        if (MediaType.APPLICATION_JSON_VALUE.equals(request.getContentType())) {
+            try {
+                // JSON 요청 바디 파싱
+                ObjectMapper objectMapper = new ObjectMapper();
+                Map<String, String> loginData = objectMapper.readValue(request.getInputStream(), Map.class);
+
+                System.out.println(loginData);
+                loginId = loginData.get("loginId");
+                loginPassword = loginData.get("loginPassword");
+            } catch (IOException e) {
+                request.setAttribute("exception", UNSUPPORTED_TYPE);
+                throw new JwtAuthException(UNSUPPORTED_TYPE, e);
             }
-
-            Optional<UserDto> findUser = userDAO.findByLoginId(loginId);
-            if (findUser.isEmpty()) {
-                request.setAttribute("exception", INVALID_EMAIL_OR_PASSWORD);
-                throw new JwtAuthException(INVALID_EMAIL_OR_PASSWORD);
-            }
-            UserDto user = findUser.get();
-            log.info(user.getLoginPassword());
-
-
-            //스프링 시큐리티에서 userId와 password를 검증하기 위해서는 token에 담아야 함
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(loginId, loginPassword, null);
-
-            //token에 담은 검증을 위한 AuthenticationManager로 전달
-            return authenticationManager.authenticate(authToken);
-
-        } catch (IOException e) {
-            request.setAttribute("exception", UNSUPPORTED_TYPE);
-            throw new JwtAuthException(UNSUPPORTED_TYPE, e);
+        } else {
+            // form-data 처리
+            loginId = request.getParameter("loginId");
+            loginPassword = request.getParameter("loginPassword");
         }
+
+
+        if (loginId == null || loginPassword == null) {
+            request.setAttribute("exception", EMPTY_EMAIL_OR_PASSWORD);
+            throw new JwtAuthException(EMPTY_EMAIL_OR_PASSWORD);
+        }
+
+        Optional<UserDto> findUser = userDAO.findByLoginId(loginId);
+        if (findUser.isEmpty()) {
+            request.setAttribute("exception", INVALID_EMAIL_OR_PASSWORD);
+            throw new JwtAuthException(INVALID_EMAIL_OR_PASSWORD);
+        }
+        UserDto user = findUser.get();
+        log.info(user.getLoginPassword());
+
+
+        //스프링 시큐리티에서 userId와 password를 검증하기 위해서는 token에 담아야 함
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(loginId, loginPassword);
+
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            Object saved = session.getAttribute("SPRING_SECURITY_SAVED_REQUEST");
+            System.out.println("✅ SavedRequest = " + saved);
+        }
+
+        //token에 담은 검증을 위한 AuthenticationManager로 전달
+        setDetails(request, authToken);
+        return authenticationManager.authenticate(authToken);
     }
 
     //로그인 성공시 실행하는 메소드 (여기서 JWT를 발급)
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
+
         //유저 정보 - CustomUserDetails에서 userId 가져오기
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUser().getId();
