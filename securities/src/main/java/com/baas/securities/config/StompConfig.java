@@ -53,7 +53,7 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
                 .addInterceptors(dontNeedAuthInterceptor)
                 .withSockJS();
         //WebSocket을 지원하지 않는 브라우저에서도 SockJS를 통해 WebSocket 기능을 사용할 수 있게 합니다.
-        registry.addEndpoint("ws-stomp-stock-order")
+        registry.addEndpoint("/ws-stomp-stock-order")
                 //클라이언트의 origin을 명시적으로 지정합니다.
                 .setAllowedOrigins("http://localhost:5500", "http://127.0.0.1:5500")
                 .withSockJS();
