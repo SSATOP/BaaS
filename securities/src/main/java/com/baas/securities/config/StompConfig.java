@@ -31,7 +31,7 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         //STOMP(WebSocket 메시지 브로커 프로토콜) 엔드포인트를 등록하는 메서드로, 클라이언트가 WebSocket에 연결할 수 있는 엔드포인트를 정의합니다.
         //addEndpoint() : 클라이언트가 WebSocket에 연결하기 위한 엔드포인트를 "/ws-stomp"로 설정합니다.
-        registry.addEndpoint("ws-stomp")
+        registry.addEndpoint("/ws-stomp")
                 //클라이언트의 origin을 명시적으로 지정합니다.
                 .setAllowedOrigins("http://localhost:5500", "http://127.0.0.1:5500")
                 .withSockJS();

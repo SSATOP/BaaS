@@ -52,12 +52,11 @@ public class RealTimeTradingController {
      * 구독 컨트롤러
      * 구독 해지 로직은 ChanelInterceptor 에서 진행.
      */
-    @MessageMapping("/stock/{ticker}")
-    public void subRealtimeStockInfo(StompHeaderAccessor accessor, @DestinationVariable String ticker) throws IOException {
-        log.info("sub stomp: session id={}, ticker={}", accessor.getSessionId(), ticker);
-        String sessionId = accessor.getSessionId();
-        kisService.subRealtimeStock(sessionId, ticker);
-    }
-
-    // SEC-9 TODO : 해외주식 realtime
+    // stomppreHandler가 이 역할 대신하며, race condition 유발할까봐 주석 처리
+//    @MessageMapping("/stock/{ticker}")
+//    public void subRealtimeStockInfo(StompHeaderAccessor accessor, @DestinationVariable String ticker) throws IOException {
+//        log.info("sub stomp: session id={}, ticker={}", accessor.getSessionId(), ticker);
+//        String sessionId = accessor.getSessionId();
+//        kisService.subRealtimeStock(sessionId, ticker);
+//    }
 }
