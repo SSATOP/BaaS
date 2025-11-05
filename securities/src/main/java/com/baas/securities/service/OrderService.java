@@ -12,6 +12,7 @@ import com.baas.securities.repository.entity.Holdings;
 import com.baas.securities.repository.entity.Order;
 import com.baas.securities.repository.entity.Transaction;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class OrderService {
 
     private final AccountRepository accountRepository;
@@ -59,8 +61,7 @@ public class OrderService {
         account.updateBalance(account.getBalance().subtract(transaction.getAmount()));
         accountRepository.update(account);
 
-        // step6: 보유종목 생성 ?? 생성으로 해야할지 추가로 해야할지 -> TODO: 생성이 아니라 추가로 진행해야 함.
-        // 6 - 1 : 종목을 보유하고 있으면 기존의 보유 종목, 아니라면 새로 생성해서 반환.
+        // 6 - 1 : 종목을 보유하고 있으면 기존의 보유 종목 반환, 아니라면 새로 생성해서 반환.
         Holdings holdings = holdingsRepository.findByUserIdAndTicker(infoDto.getUserId(), dto.getTicker())
                 .orElseGet(() -> generateHoldings(dto, infoDto));
 
@@ -79,13 +80,14 @@ public class OrderService {
         // step1. 계좌 확인
         String accountNumber  = dto.getAccountNumber();
         // 빈 객체일시 예외를 던짐
-        Account account = accountRepository.findByAccountNumber(accountNumber).orElseThrow(() -> new IllegalArgumentException("잘못된 토큰입니다."));
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 토큰입니다."));
 
         // step2 : 종목 존재 확인
         validateSymbol(dto.getTicker());
 
         // step3: 보유종목 생성 -> 생성이 아니라 찾는걸로
-        Holdings holdings = holdingsRepository.findByUserIdAndTicker(account.getId(), dto.getTicker())
+        Holdings holdings = holdingsRepository.findByUserIdAndTicker(infoDto.getUserId(), dto.getTicker())
                 .orElseThrow(() -> new IllegalArgumentException("보유하지 않은 종목입니다."));
 
         // step4-1.주문 수량 확인
@@ -107,9 +109,11 @@ public class OrderService {
 
         accountRepository.update(account);
 
-        //step 8 : 보유종목 감소(dto에서 주문량 가져올지 order에서 가져올지 묻기)
-
+        //step 8 : 보유종목 감소
         holdings.updateQuantity(holdings.getQuantity()-dto.getQuantity());
+
+        holdingsRepository.save(holdings);
+
         // step 8-1 : 보유 주식 다 팔았을 경우 해당 보유 종목 삭제
         if(holdings.getQuantity() == 0){
             holdingsRepository.deleteById(holdings.getId());

@@ -57,7 +57,7 @@ class OrderServiceTest {
         StockOrderDTO dto = new StockOrderDTO();
         dto.setOrderType(TransactionType.SELL.name());
         dto.setTicker(TickerDummy.SS.getName());
-        dto.setPrice(900d);
+        dto.setPrice(1500d);
         dto.setQuantity(2L);
         dto.setCurrentType("원화");
         dto.setAccountNumber("867-859-577865");
