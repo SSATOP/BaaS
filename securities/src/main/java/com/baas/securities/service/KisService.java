@@ -1,5 +1,7 @@
 package com.baas.securities.service;
 
+import com.baas.securities.exception.ErrorCode;
+import com.baas.securities.exception.ex.InternalServerErrorException;
 import com.baas.securities.repository.KisSocketRepository;
 import com.baas.securities.util.WebSocketMessageMaker;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +34,17 @@ public class KisService {
 
         log.info("KIS 구독 메시지 전송: {}, {}", ticker, reqMsg);
 
-        kisRepository.getKisSession()
-                .orElseThrow(() -> new IllegalArgumentException("KIS 웹소켓이 연결되어있지 않습니다."))
-                .sendMessage(new TextMessage(reqMsg));
+        try {
+            kisRepository.getKisSession()
+
+                    .orElseThrow(() -> new InternalServerErrorException(ErrorCode.STREAM_ERROR))
+                    .sendMessage(new TextMessage(reqMsg));
+
+        } catch (IOException e) {
+
+            log.error("KIS WebSocket 메시지 전송 실패 (구독 해지): {}", ticker, e);
+            throw new InternalServerErrorException(ErrorCode.STREAM_ERROR);
+        }
 
         log.info("KIS 구독 요청 완료: {}", ticker);
     }
@@ -52,10 +62,17 @@ public class KisService {
 
         log.info("KIS 구독 해지 메시지 전송: {}, {}", ticker, reqMsg);
 
-        kisRepository.getKisSession()
-                .orElseThrow(() -> new IllegalArgumentException("KIS 웹소켓이 연결되어있지 않습니다."))
-                .sendMessage(new TextMessage(reqMsg));
+        try {
+            kisRepository.getKisSession()
 
+                    .orElseThrow(() -> new InternalServerErrorException(ErrorCode.STREAM_ERROR))
+                    .sendMessage(new TextMessage(reqMsg));
+
+        } catch (IOException e) {
+
+            log.error("KIS WebSocket 메시지 전송 실패 (구독 해지): {}", ticker, e);
+            throw new InternalServerErrorException(ErrorCode.STREAM_ERROR);
+        }
         log.info("KIS 구독 해지 요청 완료: {}", ticker);
     }
 
@@ -68,14 +85,21 @@ public class KisService {
     public String fetchNewApprovalKeyFromKisApi() throws Exception {
         log.info("KIS API에 새 승인 키 발급을 요청합니다...");
 
-        // TODO: (이전 설명과 동일)
-        // KIS '승인 키 발급' API 실제 호출 로직 구현...
-        // (RestTemplate 또는 WebClient 사용)
+        try {
+            // TODO: (이전 설명과 동일)
+            // KIS '승인 키 발급' API 실제 호출 로직 구현...
+            // (RestTemplate 또는 WebClient 사용)
 
-        // (임시 반환값) -> 위 TODO를 실제 로직으로 교체해야 함
-        String temporaryNewKey = "temp_new_key_from_api_call_" + System.currentTimeMillis();
-        log.info("임시 새 키 발급: {}", temporaryNewKey);
-        return temporaryNewKey;
+
+            String temporaryNewKey = "temp_new_key_from_api_call_" + System.currentTimeMillis();
+            log.info("임시 새 키 발급: {}", temporaryNewKey);
+            return temporaryNewKey;
+
+        } catch (Exception e) {
+
+            log.error("KIS 승인 키 발급 API 호출 실패", e);
+            throw new InternalServerErrorException(ErrorCode.MARKET_DATA_ERROR);
+        }
     }
 
 }

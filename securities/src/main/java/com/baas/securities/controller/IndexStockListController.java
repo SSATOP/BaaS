@@ -3,6 +3,8 @@ package com.baas.securities.controller;
 import com.baas.securities.dto.ResponseDTO;
 import com.baas.securities.dto.StockListDTO;
 import com.baas.securities.dto.StockListSearchCondition;
+import com.baas.securities.exception.ErrorCode;
+import com.baas.securities.exception.ex.InternalServerErrorException;
 import com.baas.securities.service.IndexHttpService;
 import com.baas.securities.service.StockHttpService;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +35,7 @@ public class IndexStockListController {
         }
 
         if (data == null) {
-            throw new IllegalStateException("값이 조회되지 않았습니다.");
+            throw new InternalServerErrorException(ErrorCode.MARKET_DATA_ERROR);
         }
 
         return createResDTO(HttpStatus.OK, "조회 성공", data);
