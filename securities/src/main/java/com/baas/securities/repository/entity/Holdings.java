@@ -1,5 +1,6 @@
 package com.baas.securities.repository.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class Holdings {
     private String id;
     private String symbol;
@@ -32,6 +34,6 @@ public class Holdings {
     // todo : 종목별 수량 및 현재가 손실 관리 필요
     public void updateQuantity(Long quantity){
         this.quantity = quantity;
-
+        this.lastUpdated = LocalDateTime.now();
     }
 }

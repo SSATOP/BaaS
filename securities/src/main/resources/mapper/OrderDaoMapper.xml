@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baas.securities.repository.dao.OrderDao">
+    <insert id="save">
+        insert into `orders` (id, user_id, account_id, symbol, order_type, order_status, quantity, price, total_amount, created_at, completed_at, fail_reason)
+        values (#{id}, #{userId}, #{accountId}, #{symbol}, #{orderType}, #{orderStatus}, #{quantity}, #{price}, #{totalAmount}, #{createdAt}, #{completedAt}, #{failReason});
+    </insert>
+
+    <select id="findById" resultType="Order">
+        select * from orders where id = #{id};
+    </select>
+</mapper>

@@ -27,6 +27,11 @@
         where u.email = #{email};
     </select>
 
+    <select id="findByEmailAndAccountNumber" resultType="Account">
+        select * from `accounts` acc join `users` usr on acc.user_id = usr.id
+        where account_number = #{accountNumber} and email = #{email};
+    </select>
+
     <resultMap id="accountResultMap" type="Account">
         <id column="id" property="id"/>
         <result column="user_id" property="userId"/>

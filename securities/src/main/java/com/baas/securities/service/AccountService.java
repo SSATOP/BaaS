@@ -1,5 +1,6 @@
 package com.baas.securities.service;
 
+import com.baas.securities.dto.AccIdUserIdInfoDTO;
 import com.baas.securities.dto.account.*;
 import com.baas.securities.dto.security.AuthUser;
 import com.baas.securities.enums.TransactionStatus;
@@ -150,6 +151,13 @@ public class AccountService {
         // 6. 응답 DTO 반환
         return new TransactionResDTO(account.getId(), account.getBalance());
 
+    }
+
+    public AccIdUserIdInfoDTO validateAccountByEmailAndAccountNumber(String email, String accountNumber) {
+        Account account = accountRepository.findByEmailAndAccountNumber(email, accountNumber)
+                .orElseThrow(() -> new IllegalArgumentException("유저가 가지고 있지 않는 계좌입니다."));
+
+        return AccIdUserIdInfoDTO.generate(account);
     }
 
 

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -19,15 +20,15 @@ public class Order {
     private String orderType;         // 주문 종류
     private OrderStatus orderStatus;       // 주문 상태
     private Long quantity;            // 주문량
-    private Double price;               // 한 주당 가격
-    private Double totalAmount;         // 총 주문 금액
+    private BigDecimal price;               // 한 주당 가격
+    private BigDecimal totalAmount;         // 총 주문 금액
     private LocalDateTime createdAt;  // 주문 시점
     private LocalDateTime completedAt;// 주문 완료 시점
     private String failReason;        // 주문 실패 사유
 
     @Builder
 
-    public Order(String userId, String accountId, String symbol, String orderType, OrderStatus orderStatus, Long quantity, Double price, Double totalAmount, LocalDateTime createdAt, LocalDateTime completedAt, String failReason) {
+    public Order(String userId, String accountId, String symbol, String orderType, OrderStatus orderStatus, Long quantity, BigDecimal price, BigDecimal totalAmount, LocalDateTime createdAt, LocalDateTime completedAt, String failReason) {
         this.userId = userId;
         this.accountId = accountId;
         this.symbol = symbol;

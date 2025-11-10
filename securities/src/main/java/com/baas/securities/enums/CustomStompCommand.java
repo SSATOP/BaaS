@@ -4,11 +4,14 @@ public enum CustomStompCommand {
     CONNECT, SEND, SUBSCRIBE, UNSUBSCRIBE, DISCONNECT;
 
     public static boolean isCloseCommand(String command) {
-        for (CustomStompCommand val : CustomStompCommand.values()) {
-            if (val.name().equals(command)) {
-                return true;
-            }
-        }
-        return false;
+        return command.equals(UNSUBSCRIBE.name()) || command.equals(DISCONNECT.name());
+    }
+
+    public static boolean isConnectCommand(String command) {
+        return command.equals(CONNECT.name());
+    }
+
+    public static boolean isSendOrSubscribe(String command) {
+        return command.equals(SUBSCRIBE.name()) || command.equals(SEND.name());
     }
 }

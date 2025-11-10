@@ -1,4 +1,4 @@
-package com.baas.securities.handler;
+package com.baas.securities.ws;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.CloseStatus;

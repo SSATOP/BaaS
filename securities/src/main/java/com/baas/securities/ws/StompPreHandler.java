@@ -1,20 +1,16 @@
-package com.baas.securities.handler;
+package com.baas.securities.ws;
 
 import com.baas.securities.enums.CustomStompCommand;
 import com.baas.securities.repository.KisSocketRepository;
 import com.baas.securities.service.KisService;
-import com.baas.securities.util.WebSocketMessageMaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.TextMessage;
 
 import java.io.IOException;
 
