@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.baas.oauth.mapper.RegisterMapper">
+
+    <resultMap id="RegisterResultMap" type="com.baas.oauth.model.Register">
+        <id property="id" column="id" />
+        <result property="clientId" column="client_id" />
+        <result property="clientIdIssuedAt" column="client_id_issued_at" />
+        <result property="clientSecret" column="client_secret" />
+        <result property="clientSecretExpiresAt" column="client_secret_expires_at" />
+        <result property="clientName" column="client_name" />
+        <result property="clientAuthenticationMethods" column="client_authentication_methods" />
+        <result property="authorizationGrantTypes" column="authorization_grant_types" />
+        <result property="redirectUris" column="redirect_uris" />
+        <result property="postLogoutRedirectUris" column="post_logout_redirect_uris" />
+        <result property="scopes" column="scopes" />
+        <result property="clientSettings" column="client_settings" />
+        <result property="tokenSettings" column="token_settings" />
+    </resultMap>
+
+    <select id="findById" parameterType="string" resultMap="RegisterResultMap">
+        SELECT * FROM oauth2_register
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByClientId" parameterType="string" resultMap="RegisterResultMap">
+        SELECT * FROM oauth2_register
+        WHERE client_id = #{clientId}
+    </select>
+
+    <delete id="deleteById" parameterType="string">
+        DELETE FROM oauth2_register
+        WHERE id = #{id}
+    </delete>
+
+    <insert id="save" parameterType="com.baas.oauth.model.Register">
+        INSERT INTO oauth2_register (
+            id, client_id, client_id_issued_at, client_secret, client_secret_expires_at,
+            client_name, client_authentication_methods, authorization_grant_types,
+            redirect_uris, post_logout_redirect_uris, scopes, client_settings, token_settings
+        ) VALUES (
+                     #{id}, #{clientId}, #{clientIdIssuedAt}, #{clientSecret}, #{clientSecretExpiresAt},
+                     #{clientName}, #{clientAuthenticationMethods}, #{authorizationGrantTypes},
+                     #{redirectUris}, #{postLogoutRedirectUris}, #{scopes}, #{clientSettings}, #{tokenSettings}
+                 )
+    </insert>
+
+    <update id="update" parameterType="com.baas.oauth.model.Register">
+        UPDATE oauth2_register
+        SET
+            client_id = #{clientId},
+            client_id_issued_at = #{clientIdIssuedAt},
+            client_secret = #{clientSecret},
+            client_secret_expires_at = #{clientSecretExpiresAt},
+            client_name = #{clientName},
+            client_authentication_methods = #{clientAuthenticationMethods},
+            authorization_grant_types = #{authorizationGrantTypes},
+            redirect_uris = #{redirectUris},
+            post_logout_redirect_uris = #{postLogoutRedirectUris},
+            scopes = #{scopes},
+            client_settings = #{clientSettings},
+            token_settings = #{tokenSettings}
+        WHERE
+            id = #{id}
+    </update>
+
+</mapper>
