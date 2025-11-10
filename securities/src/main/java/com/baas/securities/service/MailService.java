@@ -3,6 +3,7 @@ package com.baas.securities.service;
 import com.baas.securities.dto.security.AuthUser;
 import com.baas.securities.dto.email.EmailValidationResDTO;
 import com.baas.securities.dto.email.VerifiedEmailValidationDTO;
+import com.baas.securities.exception.ex.BadRequestException;
 import com.baas.securities.repository.EmailValidationRepository;
 import com.baas.securities.repository.entity.EmailValidation;
 import jakarta.mail.MessagingException;
@@ -81,7 +82,7 @@ public class MailService {
 
     public void validate(AuthUser user, String email) {
         if (!user.getEmail().equals(email)) {
-            throw new IllegalArgumentException("사용자의 이메일과 제공된 이메일의 정보가 일치하지 않습니다. 확인해주세요!");
+            throw new BadRequestException("사용자의 이메일과 제공된 이메일의 정보가 일치하지 않습니다. 확인해주세요!", "NOT_MATCH_USER_EMAIL");
         }
     }
 
