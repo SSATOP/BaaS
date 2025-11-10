@@ -20,6 +20,7 @@ public class KisScheduler {
     private final KisSocketRepository kisSocketRepository;
 
 
+    // TODO : api 접근키도 같이하기.
     @Scheduled(cron = "0 55 23 * * *", zone = "Asia/Seoul")
     public void refreshKisApprovalKey() {
         log.info("KIS 승인 키 갱신 스케줄러 시작 (매일 23:55)");

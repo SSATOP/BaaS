@@ -5,7 +5,6 @@ import com.baas.securities.dto.account.*;
 import com.baas.securities.dto.security.AuthUser;
 import com.baas.securities.enums.TransactionStatus;
 import com.baas.securities.enums.TransactionType;
-import com.baas.securities.exception.InsufficientBalanceException;
 import com.baas.securities.repository.AccountRepository;
 import com.baas.securities.repository.TransactionRepository;
 import com.baas.securities.repository.UserRepository;
@@ -33,8 +32,6 @@ public class AccountService {
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
     private final AbstractMessageSendingTemplate abstractMessageSendingTemplate;
-
-
     /**
      *  송금 로직
      */
