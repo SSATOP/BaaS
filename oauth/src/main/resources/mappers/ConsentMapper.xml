@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.baas.oauth.mapper.ConsentMapper">
+
+    <resultMap id="ConsentResultMap" type="com.baas.oauth.model.Consent">
+        <id property="registeredClientId" column="registered_client_id" />
+        <id property="principalName" column="principal_name" />
+        <result property="authorities" column="authorities" />
+    </resultMap>
+
+    <select id="findById" resultMap="ConsentResultMap">
+        SELECT * FROM oauth2_consent
+        WHERE registered_client_id = #{registeredClientId}
+          AND principal_name = #{principalName}
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM oauth2_consent
+        WHERE registered_client_id = #{registeredClientId}
+          AND principal_name = #{principalName}
+    </delete>
+
+    <insert id="save" parameterType="com.baas.oauth.model.Consent">
+        INSERT INTO oauth2_consent (
+            registered_client_id, principal_name, authorities
+        ) VALUES (
+                     #{registeredClientId}, #{principalName}, #{authorities}
+                 )
+    </insert>
+
+    <update id="update" parameterType="com.baas.oauth.model.Consent">
+        UPDATE oauth2_consent
+        SET
+            authorities = #{authorities}
+        WHERE
+            registered_client_id = #{registeredClientId}
+          AND principal_name = #{principalName}
+    </update>
+
+</mapper>
