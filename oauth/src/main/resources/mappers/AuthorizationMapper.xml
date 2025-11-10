@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.baas.oauth.mapper.AuthorizationMapper">
+
+    <resultMap id="AuthorizationResultMap" type="com.baas.oauth.model.Authorization">
+        <id property="id" column="id"/>
+        <result property="registeredClientId" column="registered_client_id"/>
+        <result property="principalName" column="principal_name"/>
+        <result property="authorizationGrantType" column="authorization_grant_type"/>
+        <result property="authorizedScopes" column="authorized_scopes"/>
+        <result property="attributes" column="attributes"/>
+        <result property="state" column="state"/>
+        <result property="authorizationCodeValue" column="authorization_code_value"/>
+        <result property="authorizationCodeIssuedAt" column="authorization_code_issued_at"/>
+        <result property="authorizationCodeExpiresAt" column="authorization_code_expires_at"/>
+        <result property="authorizationCodeMetadata" column="authorization_code_metadata"/>
+        <result property="accessTokenValue" column="access_token_value"/>
+        <result property="accessTokenIssuedAt" column="access_token_issued_at"/>
+        <result property="accessTokenExpiresAt" column="access_token_expires_at"/>
+        <result property="accessTokenMetadata" column="access_token_metadata"/>
+        <result property="accessTokenType" column="access_token_type"/>
+        <result property="accessTokenScopes" column="access_token_scopes"/>
+        <result property="refreshTokenValue" column="refresh_token_value"/>
+        <result property="refreshTokenIssuedAt" column="refresh_token_issued_at"/>
+        <result property="refreshTokenExpiresAt" column="refresh_token_expires_at"/>
+        <result property="refreshTokenMetadata" column="refresh_token_metadata"/>
+        <result property="oidcIdTokenValue" column="oidc_id_token_value"/>
+        <result property="oidcIdTokenIssuedAt" column="oidc_id_token_issued_at"/>
+        <result property="oidcIdTokenExpiresAt" column="oidc_id_token_expires_at"/>
+        <result property="oidcIdTokenMetadata" column="oidc_id_token_metadata"/>
+        <result property="oidcIdTokenClaims" column="oidc_id_token_claims"/>
+        <result property="userCodeValue" column="user_code_value"/>
+        <result property="userCodeIssuedAt" column="user_code_issued_at"/>
+        <result property="userCodeExpiresAt" column="user_code_expires_at"/>
+        <result property="userCodeMetadata" column="user_code_metadata"/>
+        <result property="deviceCodeValue" column="device_code_value"/>
+        <result property="deviceCodeIssuedAt" column="device_code_issued_at"/>
+        <result property="deviceCodeExpiresAt" column="device_code_expires_at"/>
+        <result property="deviceCodeMetadata" column="device_code_metadata"/>
+    </resultMap>
+
+    <select id="findById" parameterType="string" resultMap="AuthorizationResultMap">
+        SELECT *
+        FROM oauth2_authorization
+        WHERE id = #{id}
+    </select>
+
+    <delete id="deleteById" parameterType="string">
+        DELETE
+        FROM oauth2_authorization
+        WHERE id = #{id}
+    </delete>
+
+    <insert id="save" parameterType="com.baas.oauth.model.Authorization">
+        INSERT INTO oauth2_authorization (id, registered_client_id, principal_name, authorization_grant_type,
+                                          authorized_scopes,
+                                          attributes, state, authorization_code_value, authorization_code_issued_at,
+                                          authorization_code_expires_at, authorization_code_metadata,
+                                          access_token_value,
+                                          access_token_issued_at, access_token_expires_at, access_token_metadata,
+                                          access_token_type, access_token_scopes, refresh_token_value,
+                                          refresh_token_issued_at,
+                                          refresh_token_expires_at, refresh_token_metadata, oidc_id_token_value,
+                                          oidc_id_token_issued_at, oidc_id_token_expires_at, oidc_id_token_metadata,
+                                          oidc_id_token_claims, user_code_value, user_code_issued_at,
+                                          user_code_expires_at,
+                                          user_code_metadata, device_code_value, device_code_issued_at,
+                                          device_code_expires_at,
+                                          device_code_metadata)
+        VALUES (#{id}, #{registeredClientId}, #{principalName}, #{authorizationGrantType}, #{authorizedScopes},
+                #{attributes}, #{state}, #{authorizationCodeValue}, #{authorizationCodeIssuedAt},
+                #{authorizationCodeExpiresAt}, #{authorizationCodeMetadata}, #{accessTokenValue},
+                #{accessTokenIssuedAt}, #{accessTokenExpiresAt}, #{accessTokenMetadata},
+                #{accessTokenType}, #{accessTokenScopes}, #{refreshTokenValue}, #{refreshTokenIssuedAt},
+                #{refreshTokenExpiresAt}, #{refreshTokenMetadata}, #{oidcIdTokenValue},
+                #{oidcIdTokenIssuedAt}, #{oidcIdTokenExpiresAt}, #{oidcIdTokenMetadata},
+                #{oidcIdTokenClaims}, #{userCodeValue}, #{userCodeIssuedAt}, #{userCodeExpiresAt},
+                #{userCodeMetadata}, #{deviceCodeValue}, #{deviceCodeIssuedAt}, #{deviceCodeExpiresAt},
+                #{deviceCodeMetadata})
+    </insert>
+
+    <update id="update" parameterType="com.baas.oauth.model.Authorization">
+        UPDATE oauth2_authorization
+        SET registered_client_id          = #{registeredClientId},
+            principal_name                = #{principalName},
+            authorization_grant_type      = #{authorizationGrantType},
+            authorized_scopes             = #{authorizedScopes},
+            attributes                    = #{attributes},
+            state                         = #{state},
+            authorization_code_value      = #{authorizationCodeValue},
+            authorization_code_issued_at  = #{authorizationCodeIssuedAt},
+            authorization_code_expires_at = #{authorizationCodeExpiresAt},
+            authorization_code_metadata   = #{authorizationCodeMetadata},
+            access_token_value            = #{accessTokenValue},
+            access_token_issued_at        = #{accessTokenIssuedAt},
+            access_token_expires_at       = #{accessTokenExpiresAt},
+            access_token_metadata         = #{accessTokenMetadata},
+            access_token_type             = #{accessTokenType},
+            access_token_scopes           = #{accessTokenScopes},
+            refresh_token_value           = #{refreshTokenValue},
+            refresh_token_issued_at       = #{refreshTokenIssuedAt},
+            refresh_token_expires_at      = #{refreshTokenExpiresAt},
+            refresh_token_metadata        = #{refreshTokenMetadata},
+            oidc_id_token_value           = #{oidcIdTokenValue},
+            oidc_id_token_issued_at       = #{oidcIdTokenIssuedAt},
+            oidc_id_token_expires_at      = #{oidcIdTokenExpiresAt},
+            oidc_id_token_metadata        = #{oidcIdTokenMetadata},
+            oidc_id_token_claims          = #{oidcIdTokenClaims},
+            user_code_value               = #{userCodeValue},
+            user_code_issued_at           = #{userCodeIssuedAt},
+            user_code_expires_at          = #{userCodeExpiresAt},
+            user_code_metadata            = #{userCodeMetadata},
+            device_code_value             = #{deviceCodeValue},
+            device_code_issued_at         = #{deviceCodeIssuedAt},
+            device_code_expires_at        = #{deviceCodeExpiresAt},
+            device_code_metadata          = #{deviceCodeMetadata}
+        WHERE id = #{id}
+    </update>
+    <select id="findByState" parameterType="string" resultMap="AuthorizationResultMap">
+        SELECT *
+        FROM oauth2_authorization
+        WHERE state = #{state}
+    </select>
+
+    <select id="findByAuthorizationCodeValue" parameterType="string" resultMap="AuthorizationResultMap">
+        SELECT *
+        FROM oauth2_authorization
+        WHERE authorization_code_value = #{authorizationCode}
+    </select>
+
+    <select id="findByAccessTokenValue" parameterType="string" resultMap="AuthorizationResultMap">
+        SELECT *
+        FROM oauth2_authorization
+        WHERE access_token_value = #{accessToken}
+    </select>
+
+    <select id="findByRefreshTokenValue" parameterType="string" resultMap="AuthorizationResultMap">
+        SELECT *
+        FROM oauth2_authorization
+        WHERE refresh_token_value = #{refreshToken}
+    </select>
+
+    <select id="findByOidcIdTokenValue" parameterType="string" resultMap="AuthorizationResultMap">
+        SELECT *
+        FROM oauth2_authorization
+        WHERE oidc_id_token_value = #{idToken}
+    </select>
+
+    <select id="findByUserCodeValue" parameterType="string" resultMap="AuthorizationResultMap">
+        SELECT *
+        FROM oauth2_authorization
+        WHERE user_code_value = #{userCode}
+    </select>
+
+    <select id="findByDeviceCodeValue" parameterType="string" resultMap="AuthorizationResultMap">
+        SELECT *
+        FROM oauth2_authorization
+        WHERE device_code_value = #{deviceCode}
+    </select>
+
+    <select id="findByAnyToken" parameterType="string" resultMap="AuthorizationResultMap">
+        SELECT *
+        FROM oauth2_authorization
+        WHERE state = #{token}
+           OR authorization_code_value = #{token}
+           OR access_token_value = #{token}
+           OR refresh_token_value = #{token}
+           OR oidc_id_token_value = #{token}
+           OR user_code_value = #{token}
+           OR device_code_value = #{token}
+    </select>
+</mapper>
