@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.baas.oauth.mapper.UserMapper">
+
+    <resultMap id="UserResultMap" type="com.baas.oauth.model.User">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="password" column="password"/>
+        <result property="userRole" column="user_role"/>
+        <result property="username" column="username"/>
+        <result property="email" column="email"/>
+        <result property="gender" column="gender"/>
+        <result property="phone" column="phone"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="deletedAt" column="deleted_at"/>
+    </resultMap>
+
+    <select id="findById" parameterType="long" resultMap="UserResultMap">
+        SELECT *
+        FROM user_entity
+        WHERE user_id = #{id}
+    </select>
+
+    <select id="findByUserId" parameterType="string" resultMap="UserResultMap">
+        SELECT *
+        FROM user_entity
+        WHERE user_id = #{username}
+    </select>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE
+        FROM user_entity
+        WHERE user_id = #{id}
+    </delete>
+
+    <insert id="save" parameterType="com.baas.oauth.model.User"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO user_entity (user_id, password, user_role, username, email,
+                                 gender, phone, created_at, deleted_at)
+        VALUES (#{userId}, #{password}, #{userRole}, #{username}, #{email},
+                #{gender}, #{phone}, NOW(), null)
+    </insert>
+
+    <update id="update" parameterType="com.baas.oauth.model.User">
+        UPDATE user_entity
+        SET user_id    = #{userId},
+            password   = #{password},
+            user_role  = #{userRole},
+            username   = #{username},
+            email      = #{email},
+            gender     = #{gender},
+            phone      = #{phone},
+            created_at = #{createdAt},
+            deleted_at = #{deletedAt}
+        WHERE id = #{id}
+    </update>
+
+</mapper>
