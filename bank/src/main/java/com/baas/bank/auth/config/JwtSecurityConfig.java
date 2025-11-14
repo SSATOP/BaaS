@@ -51,6 +51,8 @@ public class JwtSecurityConfig {
                 })
                 //oauth2
                 .oauth2Login((oauth2) -> oauth2
+                                .authorizationEndpoint(authorizationEndpointConfig -> authorizationEndpointConfig
+                                        .authorizationRequestRepository(new CookieRepository()))
                                 .userInfoEndpoint((userInfo) -> userInfo
                                         .userService(customOAuth2UserService)
                                 )
