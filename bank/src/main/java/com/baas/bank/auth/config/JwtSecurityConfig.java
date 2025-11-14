@@ -1,6 +1,8 @@
 package com.baas.bank.auth.config;
 
 import com.baas.bank.auth.dao.RefreshDAO;
+import com.baas.bank.auth.oauth2.CookieRepository;
+import com.baas.bank.auth.oauth2.CustomOAuth2UserService;
 import com.baas.bank.user.dao.UserDAO;
 import com.baas.bank.auth.filter.JwtAuthenticationFilter;
 import com.baas.bank.auth.filter.JwtLoginFilter;
@@ -16,6 +18,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -27,6 +30,7 @@ public class JwtSecurityConfig {
     private final JwtProvider jwtProvider;
     private final TokenProperties tokenProperties;
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final DefaultOAuth2UserService customOAuth2UserService;
     private final UserDAO userDAO;
     private final RefreshDAO refreshDAO;
     private final JwtService jwtService;
@@ -40,24 +44,32 @@ public class JwtSecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
+//                .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement((sm) -> {
                     sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
                 })
+                //oauth2
+                .oauth2Login((oauth2) -> oauth2
+                                .userInfoEndpoint((userInfo) -> userInfo
+                                        .userService(customOAuth2UserService)
+                                )
+//                        .successHandler(customOAuth2SuccessHandler)
+                )
 //                .exceptionHandling(ex -> ex
 //                        .authenticationEntryPoint(customAuthenticationEntryPoint)       // 인증 실패 시
 //                        .accessDeniedHandler(customAccessDeniedHandler)                 // 인가 실패 시
 //                )
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers(//back-end
-                                "/swagger-ui/**", "/auth/email/**", "/auth/reissue", "/users/**", "/login"
-                        ).permitAll()
-                        .requestMatchers(//front-end
-                                "/templates/**", "/static/**", "signup.html"
-                        ).permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                                .requestMatchers(//back-end
+                                        "/swagger-ui/**", "/auth/email/**", "/auth/reissue", "/users/**", "/login"
+                                ).permitAll()
+                                .requestMatchers(//front-end
+                                        "/templates/**", "/static/**", "signup.html"
+                                ).permitAll()
+                                .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .anyRequest().authenticated()
+                                .anyRequest().permitAll()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(tokenProperties, jwtProvider, userDAO), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(new JwtLoginFilter(tokenProperties, authenticationManager(authenticationConfiguration), jwtProvider, jwtService, refreshDAO, userDAO), UsernamePasswordAuthenticationFilter.class)
