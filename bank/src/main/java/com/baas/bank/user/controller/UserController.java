@@ -64,7 +64,8 @@ public class UserController {
     public ResponseEntity<UserSignupResponse> signupSubmit(@RequestBody UserDto userDto){
         // 예외가 발생하면 GlobalExceptionHandler가 처리
         userService.registUser(userDto);
-        
+        // TODO: Email이 검증되었는지에 대한 정보 없음.
+
         // 등록 성공 시 등록된 사용자 정보 조회 (비밀번호 제외)
         UserDto savedUser = userService.findByLoginIdWithoutPassword(userDto.getLoginId());
         UserSignupResponse response = new UserSignupResponse(savedUser.getId(), savedUser.getLoginId(), savedUser.getName());
