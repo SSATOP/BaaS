@@ -1,6 +1,7 @@
 package com.baas.securities.ws;
 
 import com.baas.securities.enums.CustomStompCommand;
+import com.baas.securities.exception.ex.UnauthorizedException;
 import com.baas.securities.exception.ErrorCode;
 import com.baas.securities.exception.ex.UnauthorizedException;
 import com.baas.securities.security.util.JwtHandler;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.expression.ExpressionException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -53,26 +55,21 @@ public class AuthStompHandler implements ChannelInterceptor {
         }
 
         // 그 외 : ( 매수 / 매도 ) 주문 웹소켓 연결
-        try {
-            if (CustomStompCommand.isConnectCommand(accessor.getCommand().name())) {
-                log.info("connect request");
-                validateAuth(accessor, sessionAttributes);
-                log.info("auth 인증 완료.");
-            }
+        if (CustomStompCommand.isConnectCommand(accessor.getCommand().name())) {
+            log.info("connect request");
+            validateAuth(accessor, sessionAttributes);
+            log.info("auth 인증 완료.");
+        }
 
-            if (CustomStompCommand.isSendOrSubscribe(accessor.getCommand().name())) {
-                setAuthUser(accessor, sessionAttributes);
-                log.info("user 설정 완료, command={}", accessor.getCommand().name());
-            }
-        } catch (IllegalAccessException e) {
-            // 예외 처리 필요.
-            throw new RuntimeException(e);
+        if (CustomStompCommand.isSendOrSubscribe(accessor.getCommand().name())) {
+            setAuthUser(accessor, sessionAttributes);
+            log.info("user 설정 완료, command={}", accessor.getCommand().name());
         }
 
         return ChannelInterceptor.super.preSend(message, channel);
     }
 
-    private void validateAuth(StompHeaderAccessor accessor, Map<String, Object> sessionAttributes) throws IllegalAccessException {
+    private void validateAuth(StompHeaderAccessor accessor, Map<String, Object> sessionAttributes) throws UnauthorizedException {
         String authorization = accessor.getFirstNativeHeader(StompHeaderUtil.AUTHORIZATION);
 
         String token = extractToken(authorization);

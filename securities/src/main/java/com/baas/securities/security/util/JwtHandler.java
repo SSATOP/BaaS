@@ -33,7 +33,7 @@ public class JwtHandler {
                 .build();
     }
 
-    public String resolve(String token) throws IllegalAccessException {
+    public String resolve(String token) throws UnauthorizedException {
         validation(token);
 
         Claims claims = Jwts.parserBuilder()
@@ -46,25 +46,26 @@ public class JwtHandler {
     }
 
     // TODO : 예외 처리 필요.
-    //모든 JWT 관련 예외를 하나의 catch 블록으로 통합
-    // (SecurityException, MalformedJwtException, SignatureException, ExpiredJwtException, UnsupportedJwtException, IllegalArgumentException 등)
-    private void validation(String token) throws ExpiredJwtException, IllegalAccessException {
+    private void validation(String token) throws UnauthorizedException {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
                     .build()
                     .parseClaimsJws(token);
             log.info("JWT VALIDATE SUCCESS");
+        } catch (SecurityException | MalformedJwtException e) {
+            throw new UnauthorizedException("Invalid JWT Token %s".formatted(e.getMessage()), "INVALID_403");
+        } catch (ExpiredJwtException e) {
+            throw new UnauthorizedException("Expired JWT Token %s".formatted(e.getMessage()), "EXPIRED_403");
+        } catch (UnsupportedJwtException e) {
+            throw new UnauthorizedException("Unsupported JWT Token %s".formatted(e.getMessage()), "UNSUPPORTED_403");
+        } catch (IllegalArgumentException e) {
+            throw new UnauthorizedException("JWT claims string is empty. %s".formatted(e.getMessage()), "STRING_EMPTY_403");
+        } catch (NullPointerException e) {
+            throw new UnauthorizedException("NOT EXISTS TOKEN [%s]".formatted(e.getMessage()), "NOT_EXISTS_403");
+        } catch (io.jsonwebtoken.security.SignatureException e) {
+            throw new UnauthorizedException("Signature Exception [%s]".formatted(e.getMessage()), "SIGNATURE_EX_403");
         } // (SecurityException, MalformedJwtException, SignatureException, ExpiredJwtException, UnsupportedJwtException, IllegalArgumentException 등)
-        catch (JwtException e) {
-            log.warn("JWT validation failed: {}", e.getMessage());
-            // [수정] 모든 예외를 'UnauthorizedException'으로 변환하여 throw
-            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED_TOKEN);
-        }
-        catch (NullPointerException e) {
-            log.warn("JWT token is null");
-            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED_TOKEN);
-        }
     }
 
     private String createToken(String email, long time) {

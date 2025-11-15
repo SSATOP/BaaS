@@ -1,5 +1,6 @@
 package com.baas.securities.config;
 
+import com.baas.securities.exception.StompErrorHandler;
 import com.baas.securities.security.resolver.StompLoginAnnotationResolver;
 import com.baas.securities.ws.AuthStompHandler;
 import com.baas.securities.ws.DontNeedAuthInterceptor;
@@ -24,6 +25,10 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
     private final StompPreHandler stompPreHandler;
     private final DontNeedAuthInterceptor dontNeedAuthInterceptor;
     private final AuthStompHandler authStompHandler;
+
+    // stomp 단에서 에러를 처리하기 위한 stompErrorHandler
+    // 1. auth 에러
+    private final StompErrorHandler stompErrorHandler;
 
     private final StompLoginAnnotationResolver stompLoginAnnotationResolver;
 
@@ -53,10 +58,14 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
                 .addInterceptors(dontNeedAuthInterceptor)
                 .withSockJS();
         //WebSocket을 지원하지 않는 브라우저에서도 SockJS를 통해 WebSocket 기능을 사용할 수 있게 합니다.
-        registry.addEndpoint("/ws-stomp-stock-order")
+
+        // 주식 매수/매도를 위한 ws-stomp-stock-order 경로에 클라이언트가 websocket을 연결하게 합니다.
+        registry.setErrorHandler(stompErrorHandler)
+                .addEndpoint("/ws-stomp-stock-order")
                 //클라이언트의 origin을 명시적으로 지정합니다.
                 .setAllowedOrigins("http://localhost:5500", "http://127.0.0.1:5500")
                 .withSockJS();
+
     }
 
     /**
@@ -73,7 +82,6 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
         registration.setSendBufferSizeLimit(1_048_576);
         registration.setSendTimeLimit(30_000);
     }
-
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
