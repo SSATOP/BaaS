@@ -1,5 +1,6 @@
 package com.baas.bank.auth.oauth2;
 
+import com.baas.bank.auth.exception.JwtAuthException;
 import com.baas.bank.user.dao.UserDAO;
 import com.baas.bank.user.dto.UserDto;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -24,95 +26,62 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String registrationId = request.getClientRegistration().getRegistrationId();
 
-        log.info("registrationId:{}", registrationId);
-
-        String providerId = "";
+        String provider = "";
+        String oauthId = "";
         String email = "";
-        String name = "";
-        String profileImgUrl = "";
+        String username = "";
+        String gender = "";
+        String phoneNumber = "";
         UserDto user = new UserDto();
-//        {
-//            "response": {
-//            "id": "ssafy",
-//                    "username": "test123",
-//                    "gender": "남자",
-//                    "email": "asdff@das.ager",
-//                    "phoneNumber": "010-1234-1234"
-//        }
-//        }
         if (registrationId.equals("baas")) {
             Map<String, String> responseMap = (Map<String, String>) oAuth2User.getAttributes().get("response");
-            providerId = "baas_" + responseMap.get("id");
+            provider = registrationId;
+            oauthId = responseMap.get("id");
+            email = responseMap.get("email");
+            username = responseMap.get("username");
+            // TODO : gender 값 활용 안함
+//            gender = responseMap.get("gender");
+            phoneNumber = responseMap.get("phoneNumber");
+            log.info("responseMap:{}", responseMap);
 
+        } else {
+            throw new JwtAuthException(JwtAuthException.UNKNOWN_ERROR);
         }
-        return null;
-//        if (registrationId.equals("naver")) {
-//            Map<String, String> responseMap = (Map<String, String>) oAuth2User.getAttributes().get("response");
-//            providerId = "naver_" + responseMap.get("id").substring(0, 14);
-//            email = responseMap.get("email");
-//            name = responseMap.get("name");
-//            profileImgUrl = responseMap.get("profile_image");
-//
-//            String birthyear = responseMap.get("birthyear");
-//            String birthday = responseMap.get("birthday");
-//            if (birthyear != null && birthday != null) {
-//                String fullDateStr = birthyear + "-" + birthday;
-//                LocalDate localDate = LocalDate.parse(fullDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-//                user.setBirthday(Timestamp.valueOf(localDate.atStartOfDay()));
-//            }
-//
-//        } else if (registrationId.equals("google")) {
-//            Map<String, Object> responseMap = oAuth2User.getAttributes();
-//            providerId = "google_" + responseMap.get("sub").toString().substring(0, 14);
-//            email = responseMap.get("email").toString();
-//            name = responseMap.get("name").toString();
-//            profileImgUrl = responseMap.get("picture").toString();
-//
-//
-//        } else {
-//            throw new JwtAuthException(AuthErrorCode.UNSUPPORTED_TYPE);
-//        }
-//
-//        Optional<User> existData = userDAO.findByProviderId(providerId);
-//        if (existData.isEmpty()) {
-//            user.setEmail(email);
-//            user.setName(name);
-//            user.setProviderId(providerId);
-//            user.setProfileImgUrl(profileImgUrl);
-//
-//            // 일반 회원가입을 진행한 이메일이 존재하는지
+
+        Optional<UserDto> existData = userDAO.findByProviderId(provider, oauthId);
+        if (existData.isEmpty()) {
+            user.setEmail(email);
+            user.setName(username);
+            user.setOauthProvider(provider);
+            user.setOauthId(oauthId);
+            user.setPhone(phoneNumber);
+
+            // TODO 일반 회원가입과 중복으로 계정을 만들어 줄지에 관하여
+            // 일반 회원가입을 진행한 이메일이 존재하는지
 //            boolean existsByEmail = userDAO.existsByEmail(email);
 //            if (existsByEmail) {
 //                // 페이지 분할 방식이라면, 에러 호출 후 프론트에서 요청하는 방식으로
 //                userDAO.updateSocialByEmail(user);  // 존재하면 연동
 //            } else {
-//                userDAO.saveSocial(user);   // 없으면 새로 생성
+                userDAO.saveSocial(user);   // 없으면 새로 생성
 //            }
-//
-//            Long id = userDAO.findIdByEmail(user.getEmail());
-//
-//            OAuthUserDTO userDto = new OAuthUserDTO();
-//            userDto.setId(id);
-//            userDto.setProviderId(providerId);
-//
-//            return new CustomOAuth2User(userDto);
-//
-//        } else {    // 소셜 계정 존재
-//            // 변경될 수 있는 값들 변경해주는 부분
-//            // 매번 업데이트 해줄지, 아니면 초기 값만 받고 우리가 따로 관리할 지
-////            user = existData.get();
-//
-////            user.setEmail(email);
-////            user.setName(name);
-////
-////            userDAO.save(user);
-//            Long id = existData.get().getId();
-//
-//            OAuthUserDTO userDto = new OAuthUserDTO();
-//            userDto.setId(id);
-//            userDto.setProviderId(providerId);
-//
-//            return new CustomOAuth2User(userDto);
-//        }
+
+            Long id = userDAO.findIdByEmail(user.getEmail());
+
+            OAuthUserDTO userDto = new OAuthUserDTO();
+            userDto.setId(id);
+            userDto.setUsername(username);
+
+            return new CustomOAuth2User(userDto);
+
+        } else {    // 소셜 계정 존재
+            Long id = existData.get().getId();
+
+            OAuthUserDTO userDto = new OAuthUserDTO();
+            userDto.setId(id);
+            userDto.setUsername(username);
+
+            return new CustomOAuth2User(userDto);
+        }
     }
 }
