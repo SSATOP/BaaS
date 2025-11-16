@@ -15,16 +15,22 @@
     </insert>
 
     <select id="findByLoginId" parameterType="String" resultType="UserDto">
-        SELECT * FROM user WHERE login_id = #{loginId}
+        SELECT *
+        FROM user
+        WHERE login_id = #{loginId}
     </select>
 
-        <select id="findByLoginIdWithoutPassword" parameterType="String" resultType="UserDto">
-            SELECT id, login_id, name, birth_date, phone, email, created_at FROM user WHERE login_id = #{loginId}
-        </select>
+    <select id="findByLoginIdWithoutPassword" parameterType="String" resultType="UserDto">
+        SELECT id, login_id, name, birth_date, phone, email, created_at
+        FROM user
+        WHERE login_id = #{loginId}
+    </select>
 
-        <select id="findByEmail" parameterType="String" resultType="UserDto">
-            SELECT id, login_id, name, birth_date, phone, email, created_at FROM user WHERE email = #{email}
-        </select>
+    <select id="findByEmail" parameterType="String" resultType="UserDto">
+        SELECT id, login_id, name, birth_date, phone, email, created_at
+        FROM user
+        WHERE email = #{email}
+    </select>
 
     <select id="findById" parameterType="Long" resultType="UserDto">
         SELECT id, login_id, name, birth_date, phone, email, created_at
@@ -42,4 +48,4 @@
         WHERE email = #{email}
     </select>
 
-    </mapper>
+</mapper>
