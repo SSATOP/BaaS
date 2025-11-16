@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ResDTO {
-
+    private String id;
     private String username;
     private String gender;
     private String email;

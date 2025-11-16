@@ -41,6 +41,8 @@ public class MainController {
             resDTO.setUsername(authentication.getName());
         }
         
+        resDTO.setId(authentication.getName());
+
         // email scope가 있으면 이메일 정보 제공
         if (scopes.contains("email") && jwt.hasClaim("email")) {
             resDTO.setEmail(jwt.getClaimAsString("email"));
