@@ -14,4 +14,10 @@ public interface UserMapper {
     UserDto findByEmail(String email);
 
     UserDto findById(Long userId);
+
+    UserDto findByProviderId(String provider, String oauthId);
+
+    void saveSocial(UserDto user);
+
+    long findIdByEmail(String email);
 }

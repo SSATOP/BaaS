@@ -16,5 +16,8 @@ public class UserDto {
     private LocalDate birthDate;    // birth_date
     private String phone;           // phone
     private String email;           // email
+    private String oauthProvider;// oauth_provider
+    private String oauthId;// oauth_id
     private LocalDateTime createdAt;// created_at
+
 }
