@@ -5,6 +5,11 @@ import com.baas.securities.dto.account.*;
 import com.baas.securities.dto.security.AuthUser;
 import com.baas.securities.enums.TransactionStatus;
 import com.baas.securities.enums.TransactionType;
+import com.baas.securities.exception.ErrorCode;
+import com.baas.securities.exception.ex.BadRequestException;
+import com.baas.securities.exception.ex.ForbiddenException;
+import com.baas.securities.exception.ex.NotFoundException;
+import com.baas.securities.exception.ex.UnauthorizedException;
 import com.baas.securities.repository.AccountRepository;
 import com.baas.securities.repository.TransactionRepository;
 import com.baas.securities.repository.UserRepository;
@@ -37,15 +42,15 @@ public class AccountService {
      */
 
     @Transactional
-    public TransferResDTO transfer(AuthUser user, TransferReqDTO dto) throws IllegalAccessException {
+    public TransferResDTO transfer(AuthUser user, TransferReqDTO dto) {
         // 1. 보내는 유저/ 계좌 확인
         User findUser = userRepository.findByEmail(user.getEmail())
-                .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 유저입니다."));
+                .orElseThrow(()-> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         // todo : fromAccountNumber가 없으면 토큰 유저의 기본 계좌등을 찾는 로직 필요
         // 요청이 있다고 가정
         Account fromAccount = accountRepository.findByAccountNumber(dto.getFromAccountNumber())
-                .orElseThrow(() -> new IllegalArgumentException("보내는 계좌 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         // 2. 본인 계좌 확인
         isUserAccount(findUser, fromAccount);
@@ -55,17 +60,17 @@ public class AccountService {
 
         // 4. 받는 계좌 확인
         Account toAccount = accountRepository.findByAccountNumber(dto.getToAccountNumber())
-                .orElseThrow(() -> new IllegalArgumentException("받는 계좌 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
 
 
         // 5. 자기 자신에게 송금하는 경우 방지
         if(fromAccount.getId().equals(toAccount.getId())){
-            throw new IllegalAccessException("자기 자신에게 송금할 수 없습니다.");
+            throw new BadRequestException(ErrorCode.SELF_TRANSFER_NOT_ALLOWED);
         }
 
         // 6. 잔액 확인
         if (fromAccount.getBalance().compareTo(dto.getAmount()) < 0) {
-            throw new InsufficientBalanceException("출금 가능한 잔액이 부족합니다.");
+            throw new BadRequestException(ErrorCode.INSUFFICIENT_BALANCE_TRANSACTION);
         }
 
         // 7. 잔액 변경
@@ -119,11 +124,11 @@ public class AccountService {
     public TransactionResDTO processTransaction(AuthUser user,String accountId, TransactionReqDTO dto) {
         // 1. 유저 확인
         User findUser = userRepository.findByEmail(user.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         // 2. 계좌 확인
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new IllegalArgumentException("계좌 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         // 3. 본인 계좌 확인
         isUserAccount(findUser, account);
@@ -138,7 +143,7 @@ public class AccountService {
                 deposit(account,dto.getAmount());
                 break;
             default :
-                throw new IllegalArgumentException("알 수 없는 트랜잭션 타입입니다");
+                throw new BadRequestException(ErrorCode.INVALID_TRANSACTION_TYPE);
 
         }
 
@@ -152,7 +157,7 @@ public class AccountService {
 
     public AccIdUserIdInfoDTO validateAccountByEmailAndAccountNumber(String email, String accountNumber) {
         Account account = accountRepository.findByEmailAndAccountNumber(email, accountNumber)
-                .orElseThrow(() -> new IllegalArgumentException("유저가 가지고 있지 않는 계좌입니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         return AccIdUserIdInfoDTO.generate(account);
     }
@@ -169,7 +174,7 @@ public class AccountService {
     private void withdraw(Account account, BigDecimal amount) {
         // 출금 가능 잔액 부족 예외 처리
         if (account.getBalance().compareTo(amount) < 0) {
-            throw new InsufficientBalanceException("출금 가능한 잔액이 부족합니다.");
+            throw new BadRequestException(ErrorCode.INSUFFICIENT_BALANCE_TRANSACTION);
         }
         account.updateBalance(account.getBalance().subtract(amount));
         accountRepository.update(account);
@@ -193,7 +198,7 @@ public class AccountService {
     public CreateAccountResDTO createAccount(AuthUser user, CreateAccountReqDTO dto) {
         // 1. 유저 확인.
         User findUser = userRepository.findByEmail(user.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         // 2. 계좌 생성.
         Account account = generateAccount(findUser, dto);
@@ -217,13 +222,13 @@ public class AccountService {
         return resDto;
     }
 
-    public FindAccountResDTO findByAccountNumber(AuthUser user, FindAccountReqDTO dto) throws IllegalAccessException {
+    public FindAccountResDTO findByAccountNumber(AuthUser user, FindAccountReqDTO dto)  {
         User findUser = userRepository.findByEmail(user.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾지 못했습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         // 존재하는 계좌인지 확인.
         Account findAccount = accountRepository.findByAccountNumber(dto.getAccountNumber())
-                .orElseThrow(() -> new IllegalArgumentException("없는 계좌번호입니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         // 계좌 비밀번호가 일치하는지 확인.
         validatePassword(findAccount, dto.getAccountPassword());
@@ -233,13 +238,13 @@ public class AccountService {
 
     private void isUserAccount(User user, Account account) {
         if (!user.getId().equals(account.getUserId())) {
-            throw new IllegalArgumentException("요청한 사용자의 계좌가 아닙니다.");
+            throw new ForbiddenException(ErrorCode.ACCOUNT_ACCESS_DENIED);
         }
     }
 
-    private void validatePassword(Account account, String password) throws IllegalAccessException {
+    private void validatePassword(Account account, String password)  {
         if (!account.getAccountPassword().equals(password)) {
-            throw new IllegalAccessException("계좌 비밀번호가 잘못되었습니다.");
+            throw new UnauthorizedException(ErrorCode.INVALID_ACCOUNT_PASSWORD);
         }
     }
 

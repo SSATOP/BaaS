@@ -3,7 +3,10 @@ package com.baas.securities.service;
 import com.baas.securities.dto.security.AuthUser;
 import com.baas.securities.dto.email.EmailValidationResDTO;
 import com.baas.securities.dto.email.VerifiedEmailValidationDTO;
+import com.baas.securities.exception.ErrorCode;
 import com.baas.securities.exception.ex.BadRequestException;
+import com.baas.securities.exception.ex.InternalServerErrorException;
+import com.baas.securities.exception.ex.NotFoundException;
 import com.baas.securities.repository.EmailValidationRepository;
 import com.baas.securities.repository.entity.EmailValidation;
 import jakarta.mail.MessagingException;
@@ -33,12 +36,26 @@ public class MailService {
     public EmailValidationResDTO sendMail(String mail) throws MessagingException {
         // 1. 인증코드 무작위 생성, message 생성
         int number = createNumber();
-        MimeMessage message = createMail(mail, number);
+        MimeMessage message;
+        try {
+            message = createMail(mail, number);
+        }catch (MessagingException e) {
+            log.error("Failed to create MimeMessage for email: {}", mail, e);
+            throw new InternalServerErrorException(ErrorCode.EMAIL_SEND_FAILED);
+        }
 
         // 2. EmailValidation 객체 생성
         EmailValidation emailValidation = generateEmailValidation(mail, number);
-        // 3. 인증 메일 발송
-        mailSender.send(message);
+
+        try {
+            // 3. 인증 메일 발송
+            mailSender.send(message);
+        } catch (Exception e) {
+            log.error("Failed to send email to: {}", mail, e);
+            // 500 에러: EMAIL_SEND_FAILED (메일 발송 실패)
+            throw new InternalServerErrorException(ErrorCode.EMAIL_SEND_FAILED);
+        }
+
 
         // 4. emailValidation 객체 db 저장
         validationRepository.save(emailValidation);
@@ -47,10 +64,10 @@ public class MailService {
         return EmailValidationResDTO.generateResDTO(emailValidation);
     }
 
-    public VerifiedEmailValidationDTO verify(String id, String code) throws IllegalArgumentException {
+    public VerifiedEmailValidationDTO verify(String id, String code)  {
         // 1. 존재 여부 체크
         EmailValidation emailValidation = validationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 인증입니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.EMAIL_STATUS_NOT_FOUND));
 
         // 2. 인증 기간이 지났는지, 이미 인증된 코드인지, 코드가 일치하는지 체크
         verifyValidationByExpiresAt(emailValidation);
@@ -82,7 +99,7 @@ public class MailService {
 
     public void validate(AuthUser user, String email) {
         if (!user.getEmail().equals(email)) {
-            throw new BadRequestException("사용자의 이메일과 제공된 이메일의 정보가 일치하지 않습니다. 확인해주세요!", "NOT_MATCH_USER_EMAIL");
+            throw new BadRequestException(ErrorCode.NOT_MATCH_USER_EMAIL);
         }
     }
 
@@ -107,20 +124,20 @@ public class MailService {
 
     private void verifyValidationByCode(EmailValidation validation, String code) {
         if (!validation.getCode().equals(code)) {
-            throw new IllegalArgumentException("인증 코드가 일치하지 않습니다.");
+            throw new BadRequestException(ErrorCode.INVALID_OR_EXPIRED_CODE);
         }
     }
 
     private void verifyValidationByExpiresAt(EmailValidation validation) {
         LocalDateTime now = LocalDateTime.now();
         if (validation.getExpiresAt().isBefore(now)) {
-            throw new IllegalArgumentException("인증 기간이 지났습니다. 다시 인증 요청 해주세요");
+            throw new BadRequestException(ErrorCode.INVALID_OR_EXPIRED_CODE);
         }
     }
 
     private void isVerifyAlready(EmailValidation validation) {
         if (validation.isVerified()) {
-            throw new IllegalArgumentException("이미 인증된 코드입니다.");
+            throw new BadRequestException(ErrorCode.EMAIL_ALREADY_VERIFIED);
         }
     }
 }

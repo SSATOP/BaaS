@@ -1,6 +1,8 @@
 package com.baas.securities.security.util;
 
 import com.baas.securities.dto.security.JwtDto;
+import com.baas.securities.exception.ErrorCode;
+import com.baas.securities.exception.ex.UnauthorizedException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,8 @@ public class JwtHandler {
     }
 
     // TODO : 예외 처리 필요.
+    //모든 JWT 관련 예외를 하나의 catch 블록으로 통합
+    // (SecurityException, MalformedJwtException, SignatureException, ExpiredJwtException, UnsupportedJwtException, IllegalArgumentException 등)
     private void validation(String token) throws ExpiredJwtException, IllegalAccessException {
         try {
             Jwts.parserBuilder()
@@ -51,18 +55,15 @@ public class JwtHandler {
                     .build()
                     .parseClaimsJws(token);
             log.info("JWT VALIDATE SUCCESS");
-        } catch (SecurityException | MalformedJwtException e) {
-            throw new IllegalAccessException("Invalid JWT Token %s".formatted(e.getMessage()));
-        } catch (ExpiredJwtException e) {
-            throw new IllegalAccessException("Expired JWT Token %s".formatted(e.getMessage()));
-        } catch (UnsupportedJwtException e) {
-            throw new IllegalAccessException("Unsupported JWT Token %s".formatted(e.getMessage()));
-        } catch (IllegalArgumentException e) {
-            throw new IllegalAccessException("JWT claims string is empty. %s".formatted(e.getMessage()));
-        } catch (NullPointerException e) {
-            throw new IllegalAccessException("NOT EXISTS TOKEN [%s]".formatted(e.getMessage()));
-        } catch (io.jsonwebtoken.security.SignatureException e) {
-            throw new IllegalAccessException("Signature Exception [%s]".formatted(e.getMessage()));
+        } // (SecurityException, MalformedJwtException, SignatureException, ExpiredJwtException, UnsupportedJwtException, IllegalArgumentException 등)
+        catch (JwtException e) {
+            log.warn("JWT validation failed: {}", e.getMessage());
+            // [수정] 모든 예외를 'UnauthorizedException'으로 변환하여 throw
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED_TOKEN);
+        }
+        catch (NullPointerException e) {
+            log.warn("JWT token is null");
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED_TOKEN);
         }
     }
 

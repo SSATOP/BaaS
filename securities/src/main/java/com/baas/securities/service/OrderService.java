@@ -6,6 +6,9 @@ import com.baas.securities.dto.stock.StockOrderDTO;
 import com.baas.securities.enums.OrderStatus;
 import com.baas.securities.enums.TransactionStatus;
 import com.baas.securities.enums.TransactionType;
+import com.baas.securities.exception.ErrorCode;
+import com.baas.securities.exception.ex.BadRequestException;
+import com.baas.securities.exception.ex.NotFoundException;
 import com.baas.securities.repository.*;
 import com.baas.securities.repository.entity.Account;
 import com.baas.securities.repository.entity.Holdings;
@@ -39,13 +42,13 @@ public class OrderService {
         // step1. 계좌 확인
         String accountNumber = dto.getAccountNumber();
         // 빈 객체일시 예외를 던짐
-        Account account = accountRepository.findByAccountNumber(accountNumber).orElseThrow(() -> new IllegalArgumentException("잘못된 토큰입니다."));
+        Account account = accountRepository.findByAccountNumber(accountNumber).orElseThrow(() -> new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         // step2-1. 주문 가능 확인 : 종목 존재 확인
         validateSymbol(dto.getTicker());
         // step2-2. 주문 오류-> 거래 생성 불가
         if (invalidateBalance(account, dto)) {
-            throw new IllegalArgumentException("잔액 부족");
+            throw new BadRequestException(ErrorCode.INSUFFICIENT_BALANCE_ORDER);
         }
         // step3. 주문 생성
         Order order = generateOrder(account, dto, infoDto);
@@ -81,19 +84,19 @@ public class OrderService {
         String accountNumber  = dto.getAccountNumber();
         // 빈 객체일시 예외를 던짐
         Account account = accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() -> new IllegalArgumentException("잘못된 토큰입니다."));
+                .orElseThrow(() ->  new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         // step2 : 종목 존재 확인
         validateSymbol(dto.getTicker());
 
         // step3: 보유종목 생성 -> 생성이 아니라 찾는걸로
         Holdings holdings = holdingsRepository.findByUserIdAndTicker(infoDto.getUserId(), dto.getTicker())
-                .orElseThrow(() -> new IllegalArgumentException("보유하지 않은 종목입니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.STOCK_HOLDING_NOT_FOUND));
 
         // step4-1.주문 수량 확인
         // step4-2.주문 오류 -> 거래 생성 불가
         if(invalidateQuantity(dto,holdings)){
-            throw new IllegalArgumentException("보유 수량 부족");
+            throw new BadRequestException(ErrorCode.INSUFFICIENT_STOCK_QUANTITY);
         }
 
         // step5. 주문 생성
@@ -124,7 +127,7 @@ public class OrderService {
 
     private void validateSymbol(String symbol) {
         symbolRepository.findBySymbol(symbol)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 종목입니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.STOCK_NOT_FOUND_ORDER));
     }
 
 

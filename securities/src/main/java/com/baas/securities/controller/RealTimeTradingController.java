@@ -5,6 +5,9 @@ import com.baas.securities.dto.security.AuthUser;
 import com.baas.securities.dto.stock.OrderResDTO;
 import com.baas.securities.dto.ResponseDTO;
 import com.baas.securities.dto.stock.StockOrderDTO;
+import com.baas.securities.exception.ErrorCode;
+import com.baas.securities.exception.ex.BadRequestException;
+import com.baas.securities.exception.ex.HttpBaseException;
 import com.baas.securities.security.resolver.Login;
 import com.baas.securities.service.AccountService;
 import com.baas.securities.service.KisService;
@@ -43,19 +46,28 @@ public class RealTimeTradingController {
     @SendToUser("/sub/stock/order")
     public ResponseDTO order(@RequestBody StockOrderDTO dto, StompHeaderAccessor accessor, @Login AuthUser user) {
         String sessionId = accessor.getSessionId();
-        // Todo : 요청한 사용자와 계좌가 일치하는지 절차 필요
         String email = user.getEmail();
+
         log.info("user = {}, sessionId={}", email, sessionId);
 
+        // --- [수정 포인트] try-catch를 벗겨내고 로직만 일자로 배치 ---
+
+        // 1. 유효성 검증
+        // 여기서 예외가 터지면 -> 알아서 메서드 실행이 중단되고 ControllerAdvice로 날아갑니다.
         AccIdUserIdInfoDTO infoDto = accountService.validateAccountByEmailAndAccountNumber(email, dto.getAccountNumber());
 
         OrderResDTO orderResDTO = null;
 
+        // 2. 주문 처리
         switch (dto.getOrderType()) {
             case "BUY" -> orderResDTO = orderService.buyOrder(dto, infoDto);
             case "SELL" -> orderResDTO = orderService.sellOrder(dto, infoDto);
+            default ->
+                // 여기서 throw를 하면 -> 역시 ControllerAdvice가 잡아서 처리합니다.
+                    throw new BadRequestException(ErrorCode.INVALID_ORDER);
         }
 
+        // 3. 성공 응답
         return generateResponseDto(HttpStatus.CREATED, "접수 완료", orderResDTO);
     }
 

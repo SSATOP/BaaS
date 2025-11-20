@@ -1,6 +1,8 @@
 package com.baas.securities.ws;
 
 import com.baas.securities.enums.CustomStompCommand;
+import com.baas.securities.exception.ErrorCode;
+import com.baas.securities.exception.ex.UnauthorizedException;
 import com.baas.securities.security.util.JwtHandler;
 import com.baas.securities.util.StompHeaderUtil;
 import lombok.RequiredArgsConstructor;
@@ -96,8 +98,8 @@ public class AuthStompHandler implements ChannelInterceptor {
     }
 
     private String extractToken(String authorization) {
-        if (!StringUtils.hasText(authorization)) {
-            throw new IllegalArgumentException("인증 정보가 없습니다.");
+        if (!StringUtils.hasText(authorization)|| !authorization.startsWith("Bearer ")) {
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED_TOKEN);
         }
         return authorization.substring(7);
     }

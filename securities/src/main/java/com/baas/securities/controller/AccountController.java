@@ -83,17 +83,10 @@ public class AccountController {
     public ResponseDTO transferFunds(@Login AuthUser user, @RequestBody TransferReqDTO dto) {
         log.info("TRANSFER user={}, fromAcc={}, toAcc={}, amount={}",
                 user.getEmail(), dto.getFromAccountNumber(), dto.getToAccountNumber(), dto.getAmount());
-        try {
-            TransferResDTO resDTO = accountService.transfer(user, dto);
-            return new ResponseDTO(HttpStatus.OK, "송금이 완료되었습니다.", resDTO);
-        } catch (IllegalAccessException e) {
-            log.error("Transfer password error for user={}: {}", user.getEmail(), e.getMessage());
-            // 실제로는 ErrorCode 등을 포함한 표준 에러 응답 반환 필요
-            return new ResponseDTO(HttpStatus.BAD_REQUEST, "이체 비밀번호가 잘못되었습니다.", null);
-        } catch (IllegalArgumentException e) {
-            log.error("Transfer error for user={}: {}", user.getEmail(), e.getMessage());
-            // 실제로는 ErrorCode 등을 포함한 표준 에러 응답 반환 필요
-            return new ResponseDTO(HttpStatus.BAD_REQUEST, e.getMessage(), null);
-        }
+
+        TransferResDTO resDTO = accountService.transfer(user, dto);
+        return new ResponseDTO(HttpStatus.OK, "송금이 완료되었습니다.", resDTO);
+
+
     }
 }

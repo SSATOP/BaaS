@@ -3,6 +3,9 @@ package com.baas.securities.service;
 import com.baas.securities.dto.agreement.UserAgreementReqDTO;
 import com.baas.securities.dto.agreement.UserAgreementResDTO;
 import com.baas.securities.dto.security.AuthUser;
+import com.baas.securities.exception.ErrorCode;
+import com.baas.securities.exception.ex.ConflictException;
+import com.baas.securities.exception.ex.NotFoundException;
 import com.baas.securities.repository.UserAgreementRepository;
 import com.baas.securities.repository.UserRepository;
 import com.baas.securities.repository.entity.User;
@@ -26,8 +29,10 @@ public class UserAgreementService {
      * user agreement db에 저장.
      */
     public UserAgreementResDTO save(AuthUser user, UserAgreementReqDTO dto) throws IllegalAccessException {
+
         User findUser = userRepository.findByEmail(user.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾지 못했습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
 
         exists(user);
 
@@ -43,7 +48,7 @@ public class UserAgreementService {
      */
     public UserAgreementResDTO update(AuthUser user, UserAgreementReqDTO dto) {
         UserAgreement userAgreement = agreementRepository.findByEmail(user.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("유저의 사용자 정보 동의를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_AGREEMENT_NOT_FOUND));
 
         userAgreement.update(dto);
 
@@ -63,7 +68,7 @@ public class UserAgreementService {
 
     private void exists(AuthUser user) throws IllegalAccessException {
         if (agreementRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new IllegalAccessException("유저의 사용자 정보가 이미 존재합니다.");
+            throw new ConflictException(ErrorCode.USER_AGREEMENT_ALREADY_EXISTS);
         }
     }
 }
