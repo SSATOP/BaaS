@@ -38,6 +38,12 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updateBalance">
+        UPDATE account
+        SET balance = #{balance}
+        WHERE id = #{id}
+    </update>
+
     <select id="existsByAccountNumber" parameterType="String" resultType="boolean">
         SELECT COUNT(*) > 0
         FROM account

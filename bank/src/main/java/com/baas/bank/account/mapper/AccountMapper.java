@@ -18,6 +18,8 @@ public interface AccountMapper {
     
     void updateAlias(@Param("id") Long id, @Param("alias") String alias);
     
+    void updateBalance(@Param("id") Long id, @Param("balance") Long balance);
+    
     boolean existsByAccountNumber(String accountNumber);
 }
 
