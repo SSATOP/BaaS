@@ -6,7 +6,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@MapperScans({@MapperScan("com.baas.bank.user.mapper") // 사용자 매퍼 경로
+@MapperScans({
+    @MapperScan("com.baas.bank.user.mapper"), // 사용자 매퍼 경로
+    @MapperScan("com.baas.bank.account.mapper"), // 계좌 매퍼 경로
+    @MapperScan("com.baas.bank.transaction.mapper") // 거래 매퍼 경로
 })
 public class BankApplication {
     public static void main(String[] args) {

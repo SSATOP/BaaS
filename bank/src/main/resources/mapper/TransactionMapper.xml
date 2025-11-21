@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.baas.bank.transaction.mapper.TransactionMapper">
+
+    <insert id="insertTransaction" parameterType="TransactionDto" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO transaction (acc_id, target_acc_id, target_acc_bankcode, type, amount, balance_after, tx_datetime, memo, created_at)
+        VALUES (#{accId}, #{targetAccId}, #{targetAccBankcode}, #{type}, #{amount}, #{balanceAfter}, #{txDatetime}, #{memo}, #{createdAt})
+    </insert>
+
+    <select id="findById" parameterType="Long" resultType="TransactionDto">
+        SELECT id, acc_id, target_acc_id, target_acc_bankcode, type, amount, balance_after, tx_datetime, memo, created_at
+        FROM transaction
+        WHERE id = #{id}
+    </select>
+
+</mapper>
+
