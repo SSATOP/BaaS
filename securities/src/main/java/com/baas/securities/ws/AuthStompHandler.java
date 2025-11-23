@@ -3,14 +3,12 @@ package com.baas.securities.ws;
 import com.baas.securities.enums.CustomStompCommand;
 import com.baas.securities.exception.ex.UnauthorizedException;
 import com.baas.securities.exception.ErrorCode;
-import com.baas.securities.exception.ex.UnauthorizedException;
 import com.baas.securities.security.util.JwtHandler;
 import com.baas.securities.util.StompHeaderUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.expression.ExpressionException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -76,7 +74,7 @@ public class AuthStompHandler implements ChannelInterceptor {
 
         String email = jwtHandler.resolve(token);
         log.info("user email={}", email);
-        // 나중에 서비스에 맞는 authentication으로 변경필요.
+        // TODO: 나중에 서비스에 맞는 authentication으로 변경필요.
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(email, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
