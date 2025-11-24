@@ -41,6 +41,4 @@ public class WebSocketConfig implements WebSocketConfigurer {
             throw new RuntimeException("유효하지 않은 웹소켓 주소입니다.");
         }
     }
-
-
 }

@@ -49,7 +49,6 @@ public class StompPreHandler implements ChannelInterceptor {
                 if (ticker != null) {
                     log.info("[SUB] Session: {}, Ticker: {}", sessionId, ticker);
 
-
                     // Redis에 구독자로 추가하고 '현재 총 인원수'를 받음
                     int subscriberCount = kisRepository.subTicker(ticker, sessionId);
 

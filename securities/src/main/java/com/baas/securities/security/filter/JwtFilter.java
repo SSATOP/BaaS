@@ -1,5 +1,6 @@
 package com.baas.securities.security.filter;
 
+import com.baas.securities.exception.ex.UnauthorizedException;
 import com.baas.securities.security.util.JwtHandler;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -46,7 +47,7 @@ public class JwtFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             log.info("login email={}", email);
-        } catch (IllegalAccessException e) {
+        } catch (UnauthorizedException e) {
             throw new RuntimeException(e);
         } finally {
             filterChain.doFilter(request, response);
