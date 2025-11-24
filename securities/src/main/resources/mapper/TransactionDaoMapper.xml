@@ -14,4 +14,26 @@
                  )
     </insert>
 
+    <select id="findAllTransactionOrder" resultMap="transactionOrder">
+        select t.id, transaction_type, amount, status, t.completed_at, t.fail_reason, symbol, quantity, price
+        from transactions t join orders o on t.order_id = o.id
+        where t.account_id = #{accountId}
+        and (transaction_type like 'SELL' or transaction_type like 'BUY')
+        <if test=" startDate != null and endDate != null">
+            and t.completed_at <![CDATA[>=]]> #{startDate} and t.completed_at <![CDATA[<=]]> #{endDate}
+        </if>
+        order by t.completed_at desc;
+    </select>
+
+    <resultMap id="transactionOrder" type="TransactionOrder">
+        <id column="id" property="id"/>
+        <result column="transaction_type" property="transactionType"/>
+        <result column="amount" property="amount"/>
+        <result column="status" property="status"/>
+        <result column="completed_at" property="completedAt"/>
+        <result column="fail_reason" property="failReason"/>
+        <result column="symbol" property="symbol"/>
+        <result column="quantity" property="quantity"/>
+        <result column="price" property="price"/>
+    </resultMap>
 </mapper>

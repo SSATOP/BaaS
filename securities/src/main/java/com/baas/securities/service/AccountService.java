@@ -91,6 +91,9 @@ public class AccountService {
 
     }
 
+    /**
+     * TODO: to_account_id, to_account_type을 상대 계좌를 표현할 새로운 이름의 필드로 바꿀 필요가 있어보임.
+     */
     // 송금 거래 기록 저장 로직(출금.입금 트랜잭션 2개 생성)
     private void saveTransferTransaction(Account fromAccount, Account toAccount, BigDecimal amount) {
         // 출금 기록 (보내는 사람 기준)
@@ -102,7 +105,7 @@ public class AccountService {
                 .createdAt(LocalDateTime.now())
                 .completedAt(LocalDateTime.now())
                 .toAccountId(toAccount.getId()) // 상대방 계좌 ID 기록
-                // .toAccountType(toAccount.getAccountType()) // 필요하다면 타입도 기록
+                .toAccountType(toAccount.getAccountType()) // 필요하다면 타입도 기록
                 .build();
         transactionRepository.save(withdrawal);
 
@@ -114,7 +117,8 @@ public class AccountService {
                 .status(TransactionStatus.SUCCESS)
                 .createdAt(LocalDateTime.now())
                 .completedAt(LocalDateTime.now())
-                // .fromAccountId(fromAccount.getId()) // 보낸 사람 ID 기록 (필요하다면)
+                .toAccountId(fromAccount.getId())
+                .toAccountType(fromAccount.getAccountType())
                 .build();
         transactionRepository.save(deposit);
     }
