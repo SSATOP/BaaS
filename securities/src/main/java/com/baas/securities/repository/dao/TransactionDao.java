@@ -4,6 +4,7 @@ import com.baas.securities.dto.transaction.TransactionsReqDTO;
 import com.baas.securities.repository.TransactionRepository;
 import com.baas.securities.repository.entity.Transaction;
 import com.baas.securities.repository.entity.TransactionOrder;
+import com.baas.securities.repository.entity.TransactionRelative;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -16,4 +17,5 @@ public interface TransactionDao extends TransactionRepository {
 
     List<TransactionOrder> findAllTransactionOrder(TransactionsReqDTO dto);
 
+    List<TransactionRelative> findAllTransactionRelative(TransactionsReqDTO dto);
 }

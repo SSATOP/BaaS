@@ -25,11 +25,11 @@ public class TransactionController {
     @GetMapping
     public ResponseDTO transactions(@ModelAttribute TransactionsReqDTO dto) {
         log.info("accepted request={}", dto);
-        List<TransactionOrder> transactionOrders = null;
+        Object transactionOrders = null;
         if (dto.getIsOrder()) {
             transactionOrders = transactionService.transactionOrders(dto);
         } else {
-
+            transactionOrders = transactionService.transactionRelatives(dto);
         }
 
         return new ResponseDTO(HttpStatus.OK, "거래 목록이 조회되었습니다.", transactionOrders);

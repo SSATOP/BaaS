@@ -3,6 +3,7 @@ package com.baas.securities.repository;
 import com.baas.securities.dto.transaction.TransactionsReqDTO;
 import com.baas.securities.repository.entity.Transaction;
 import com.baas.securities.repository.entity.TransactionOrder;
+import com.baas.securities.repository.entity.TransactionRelative;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,4 +16,6 @@ public interface TransactionRepository {
     void save(Transaction transaction);
 
     List<TransactionOrder> findAllTransactionOrder(TransactionsReqDTO dto);
+
+    List<TransactionRelative> findAllTransactionRelative(TransactionsReqDTO dto);
 }

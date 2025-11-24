@@ -6,11 +6,11 @@
         INSERT INTO transactions (
             id, account_id, transaction_type, amount, status,
             created_at, completed_at, order_id, fail_reason,
-            to_account_id, to_account_type
+            relative_account_number, relative_account_username
         ) VALUES (
                      #{id}, #{accountId}, #{transactionType}, #{amount}, #{status},
                      #{createdAt}, #{completedAt}, #{orderId}, #{failReason},
-                     #{toAccountId}, #{toAccountType}
+                     #{relativeAccountNumber}, #{relativeAccountUsername}
                  )
     </insert>
 
@@ -23,6 +23,13 @@
             and t.completed_at <![CDATA[>=]]> #{startDate} and t.completed_at <![CDATA[<=]]> #{endDate}
         </if>
         order by t.completed_at desc;
+    </select>
+
+    <select id="findAllTransactionRelative" resultType="TransactionRelative">
+        select id, transaction_type, amount, status, completed_at, fail_reason, relative_account_number, relative_account_username
+        from transactions
+        where account_id = #{accountId}
+        and (transaction_type = 'DEPOSIT' or transaction_type = 'WITHDRAW');
     </select>
 
     <resultMap id="transactionOrder" type="TransactionOrder">

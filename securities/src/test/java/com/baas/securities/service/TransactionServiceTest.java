@@ -3,6 +3,7 @@ package com.baas.securities.service;
 import com.baas.securities.dto.transaction.TransactionsReqDTO;
 import com.baas.securities.repository.entity.Transaction;
 import com.baas.securities.repository.entity.TransactionOrder;
+import com.baas.securities.repository.entity.TransactionRelative;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,18 @@ class TransactionServiceTest {
         transactionOrders.forEach(System.out::println);
         // when
 
+        // then
+    }
+
+    @Test
+    @DisplayName("relative transactions")
+    void callRelative() {
+        // given
+        TransactionsReqDTO dto = new TransactionsReqDTO();
+        dto.setAccountId("1debbcd8-fad7-47e3-a18c-b8dd845d873c");
+        // when
+        List<TransactionRelative> transactionRelatives = service.transactionRelatives(dto);
+        transactionRelatives.forEach(System.out::println);
         // then
     }
 
