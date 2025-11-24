@@ -34,7 +34,10 @@ public class KisScheduler {
 
                 // 2. KisSocketRepository를 통해 '새 승인 키'를 Redis에 덮어씁니다.
                 kisSocketRepository.updateApprovalKey(newApprovalKey);
-
+                
+                // 웹 소켓 재접속 및 구독 복구 호출
+                kisService.refreshWebSocketConnection();
+                
                 log.info("KIS 승인 키 갱신 성공");
 
             } else {

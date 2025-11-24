@@ -199,4 +199,26 @@ public class KisSocketRepositoryImpl implements KisSocketRepository {
         Set<String> members = stringRedisTemplate.opsForSet().members(KEY_STORE_TICKER_PREFIX + ticker);
         log.info("session id in {} = (size={}) {}", ticker, size, members);
     }
+
+
+    /**
+     * [추가 구현] 현재 보관 중인 세션을 강제로 종료하고 null 처리
+     */
+    @Override
+    public void disconnect() {
+        WebSocketSession session = this.kisSession;
+        if (session != null) {
+            try {
+                if (session.isOpen()) {
+                    session.close();
+                }
+                log.info("KIS WebSocket 연결 종료 완료: {}", session.getId());
+            } catch (IOException e) {
+                log.error("KIS WebSocket 종료 중 오류 발생", e);
+            } finally {
+                this.kisSession = null;
+            }
+        }
+    }
+
 }
