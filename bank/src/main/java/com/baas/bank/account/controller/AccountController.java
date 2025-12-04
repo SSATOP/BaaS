@@ -25,16 +25,9 @@ public class AccountController {
      */
     @PostMapping
     public ResponseEntity<AccountCreateResponse> createAccount(@RequestBody AccountCreateRequest request) {
-        // Long userId = getCurrentUserId();
-        
-        // AccountCreateResponse response = accountService.createAccount(userId, request);
-        // return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        
-        // [테스트용] 로그인 없이 userId만으로 테스트하는 경우
-        if (request.getUserId() == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        AccountCreateResponse response = accountService.createAccount(request.getUserId(), request);
+        Long userId = getCurrentUserId();
+
+        AccountCreateResponse response = accountService.createAccount(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     
@@ -45,17 +38,11 @@ public class AccountController {
     @PutMapping("/{id}/alias")
     public ResponseEntity<String> updateAlias(
             @PathVariable Long id,
-            @RequestBody AliasUpdateRequest request,@RequestParam Long userId) {
-        // Long userId = getCurrentUserId();
+            @RequestBody AliasUpdateRequest request) {
+        Long userId = getCurrentUserId();
         
-        // accountService.updateAlias(userId, id, request.getAlias());
-        // return ResponseEntity.ok("별칭이 업데이트되었습니다.");
-        
-        // [테스트용] 로그인 없이 userId만으로 테스트하는 경우
-        // @RequestParam Long userId 추가 필요
         accountService.updateAlias(userId, id, request.getAlias());
         return ResponseEntity.ok("별칭이 업데이트되었습니다.");
-        
     }
     
     /**
@@ -63,14 +50,9 @@ public class AccountController {
      * GET /accounts
      */
     @GetMapping
-    public ResponseEntity<AccountListResponse> getAccounts(@RequestParam Long userId) {
-        // Long userId = getCurrentUserId();
+    public ResponseEntity<AccountListResponse> getAccounts() {
+        Long userId = getCurrentUserId();
         
-        // AccountListResponse response = accountService.getAccountsByUserId(userId);
-        // return ResponseEntity.ok(response);
-        
-        // [테스트용] 로그인 없이 userId만으로 테스트하는 경우
-        // @RequestParam Long userId 추가 필요
         AccountListResponse response = accountService.getAccountsByUserId(userId);
         return ResponseEntity.ok(response);
     }
