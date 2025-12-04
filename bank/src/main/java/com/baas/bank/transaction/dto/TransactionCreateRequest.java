@@ -10,9 +10,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TransactionCreateRequest {
-    private Long accId;          // 계좌 ID
-    private Long amount;         // 거래 금액
-    private String password;     // 계좌 비밀번호 (출금 시 필수)
-    private String memo;         // 메모 (선택사항)
+    private Long accId;              // 계좌 ID (송금 계좌)
+    private Long amount;             // 거래 금액
+    private String password;         // 계좌 비밀번호 (출금/이체 시 필수)
+    private String memo;             // 메모 (선택사항)
+    private Long targetAccId;        // 수신 계좌 ID (이체 시 필수)
+    private String targetAccBankcode; // 수신 계좌 은행 코드 (이체 시 필수)
 }
 
