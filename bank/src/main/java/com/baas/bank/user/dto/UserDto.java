@@ -10,8 +10,6 @@ import java.time.LocalDateTime;
 @Setter
 public class UserDto {
     private Long id;                // BIGINT AUTO_INCREMENT
-    private String loginId;         // login_id
-    private String loginPassword;   // login_password
     private String name;            // name
     private LocalDate birthDate;    // birth_date
     private String phone;           // phone

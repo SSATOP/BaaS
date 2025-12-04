@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-
 @Component
 @RequiredArgsConstructor
 public class JwtService {
@@ -26,7 +24,9 @@ public class JwtService {
     public Cookie createRefreshCookie(String token) {
         Cookie cookie = new Cookie(tokenProperties.getRefreshToken().getName(), token);
         cookie.setHttpOnly(true);
+        cookie.setPath("/");
         cookie.setMaxAge(30 * 60);
+        cookie.setSecure(false); // HTTP 환경에서 필수
         return cookie;
     }
 }

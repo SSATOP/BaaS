@@ -2,7 +2,7 @@ package com.baas.bank.auth.config;
 
 import com.baas.bank.auth.dao.RefreshDAO;
 import com.baas.bank.auth.oauth2.CookieRepository;
-import com.baas.bank.auth.oauth2.CustomOAuth2UserService;
+import com.baas.bank.auth.oauth2.CustomOAuth2SuccessHandler;
 import com.baas.bank.user.dao.UserDAO;
 import com.baas.bank.auth.filter.JwtAuthenticationFilter;
 import com.baas.bank.auth.filter.JwtLoginFilter;
@@ -34,6 +34,7 @@ public class JwtSecurityConfig {
     private final UserDAO userDAO;
     private final RefreshDAO refreshDAO;
     private final JwtService jwtService;
+    private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -44,19 +45,19 @@ public class JwtSecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-//                .formLogin(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement((sm) -> {
                     sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
                 })
                 //oauth2
                 .oauth2Login((oauth2) -> oauth2
-                                .authorizationEndpoint(authorizationEndpointConfig -> authorizationEndpointConfig
-                                        .authorizationRequestRepository(new CookieRepository()))
-                                .userInfoEndpoint((userInfo) -> userInfo
-                                        .userService(customOAuth2UserService)
-                                )
-//                        .successHandler(customOAuth2SuccessHandler)
+                        .authorizationEndpoint(authorizationEndpointConfig -> authorizationEndpointConfig
+                                .authorizationRequestRepository(new CookieRepository()))
+                        .userInfoEndpoint((userInfo) -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler(customOAuth2SuccessHandler)
                 )
 //                .exceptionHandling(ex -> ex
 //                        .authenticationEntryPoint(customAuthenticationEntryPoint)       // 인증 실패 시
@@ -70,8 +71,8 @@ public class JwtSecurityConfig {
                                         "/templates/**", "/static/**", "signup.html"
                                 ).permitAll()
                                 .requestMatchers("/admin/**").hasRole("ADMIN")
-//                        .anyRequest().authenticated()
-                                .anyRequest().permitAll()
+                                .anyRequest().authenticated()
+//                                .anyRequest().permitAll()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(tokenProperties, jwtProvider, userDAO), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(new JwtLoginFilter(tokenProperties, authenticationManager(authenticationConfiguration), jwtProvider, jwtService, refreshDAO, userDAO), UsernamePasswordAuthenticationFilter.class)

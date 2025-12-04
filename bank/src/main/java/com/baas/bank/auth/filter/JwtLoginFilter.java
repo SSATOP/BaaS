@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.baas.bank.auth.exception.JwtAuthException.*;
+
 @Slf4j
 @RequiredArgsConstructor
 public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -55,7 +56,6 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
                 ObjectMapper objectMapper = new ObjectMapper();
                 Map<String, String> loginData = objectMapper.readValue(request.getInputStream(), Map.class);
 
-                System.out.println(loginData);
                 loginId = loginData.get("loginId");
                 loginPassword = loginData.get("loginPassword");
             } catch (IOException e) {
@@ -68,7 +68,6 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
             loginPassword = request.getParameter("loginPassword");
         }
 
-
         if (loginId == null || loginPassword == null) {
             request.setAttribute("exception", EMPTY_EMAIL_OR_PASSWORD);
             throw new JwtAuthException(EMPTY_EMAIL_OR_PASSWORD);
@@ -79,17 +78,14 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
             request.setAttribute("exception", INVALID_EMAIL_OR_PASSWORD);
             throw new JwtAuthException(INVALID_EMAIL_OR_PASSWORD);
         }
-        UserDto user = findUser.get();
-        log.info(user.getLoginPassword());
-
 
         //스프링 시큐리티에서 userId와 password를 검증하기 위해서는 token에 담아야 함
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(loginId, loginPassword);
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(loginId, loginPassword,null);
 
         HttpSession session = request.getSession(false);
         if (session != null) {
             Object saved = session.getAttribute("SPRING_SECURITY_SAVED_REQUEST");
-            System.out.println("✅ SavedRequest = " + saved);
+            System.out.println("SavedRequest = " + saved);
         }
 
         //token에 담은 검증을 위한 AuthenticationManager로 전달
