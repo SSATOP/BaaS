@@ -96,6 +96,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (!isBearer) return null;
 
         return authorization.substring(7);
-
     }
 }
