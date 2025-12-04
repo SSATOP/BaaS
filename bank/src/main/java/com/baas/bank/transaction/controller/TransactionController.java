@@ -3,6 +3,7 @@ package com.baas.bank.transaction.controller;
 import com.baas.bank.auth.security.CustomUserDetails;
 import com.baas.bank.transaction.dto.TransactionCreateRequest;
 import com.baas.bank.transaction.dto.TransactionCreateResponse;
+import com.baas.bank.transaction.dto.TransactionDto;
 import com.baas.bank.transaction.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -43,6 +46,20 @@ public class TransactionController {
         } else {
             return ResponseEntity.badRequest().build();
         }
+    }
+    
+    /**
+     * 거래 내역 조회
+     * GET /transactions?accountId={id}
+     */
+    @GetMapping
+    public ResponseEntity<List<TransactionDto>> getTransactions(
+            @RequestParam Long accountId) {
+        
+        Long userId = getCurrentUserId();
+        
+        List<TransactionDto> transactions = transactionService.getTransactionsByAccountId(userId, accountId);
+        return ResponseEntity.ok(transactions);
     }
     
     /**
