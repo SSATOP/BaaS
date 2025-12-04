@@ -16,5 +16,12 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findByAccId" parameterType="Long" resultType="TransactionDto">
+        SELECT id, acc_id, target_acc_id, target_acc_bankcode, type, amount, balance_after, tx_datetime, memo, created_at
+        FROM transaction
+        WHERE acc_id = #{accId}
+        ORDER BY tx_datetime DESC, created_at DESC
+    </select>
+
 </mapper>
 
