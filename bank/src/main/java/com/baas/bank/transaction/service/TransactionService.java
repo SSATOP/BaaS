@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -308,6 +309,24 @@ public class TransactionService {
         if (amount > MAX_WITHDRAW_AMOUNT) {
             throw new RuntimeException(String.format("출금 금액은 최대 %d원을 초과할 수 없습니다.", MAX_WITHDRAW_AMOUNT));
         }
+    }
+    
+    /**
+     * 계좌의 거래 내역 조회
+     */
+    public List<TransactionDto> getTransactionsByAccountId(Long userId, Long accountId) {
+        // 1. 계좌 존재 및 소유권 확인
+        AccountDto account = accountMapper.findById(accountId);
+        if (account == null) {
+            throw new RuntimeException("계좌를 찾을 수 없습니다.");
+        }
+        
+        if (!account.getUserId().equals(userId)) {
+            throw new RuntimeException("해당 계좌에 대한 권한이 없습니다.");
+        }
+        
+        // 2. 거래 내역 조회
+        return transactionMapper.findByAccId(accountId);
     }
 }
 
