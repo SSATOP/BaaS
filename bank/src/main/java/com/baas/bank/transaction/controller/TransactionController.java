@@ -21,8 +21,8 @@ public class TransactionController {
     private final TransactionService transactionService;
     
     /**
-     * 거래 생성 (입금/출금)
-     * POST /transactions?type=DEPOSIT 또는 WITHDRAW
+     * 거래 생성 (입금/출금/이체)
+     * POST /transactions?type=DEPOSIT, WITHDRAW, 또는 TRANSFER
      */
     @PostMapping
     public ResponseEntity<TransactionCreateResponse> createTransaction(
@@ -36,6 +36,9 @@ public class TransactionController {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } else if ("WITHDRAW".equalsIgnoreCase(type)) {
             TransactionCreateResponse response = transactionService.withdraw(userId, request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } else if ("TRANSFER".equalsIgnoreCase(type)) {
+            TransactionCreateResponse response = transactionService.transfer(userId, request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } else {
             return ResponseEntity.badRequest().build();
