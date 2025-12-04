@@ -65,7 +65,7 @@ public class JwtSecurityConfig {
 //                )
                 .authorizeHttpRequests((auth) -> auth
                                 .requestMatchers(//back-end
-                                        "/swagger-ui/**", "/auth/email/**", "/auth/reissue", "/users/**", "/login"
+                                        "/swagger-ui/**", "/auth/email/**", "/auth/reissue", "/users/**", "/login/**"
                                 ).permitAll()
                                 .requestMatchers(//front-end
                                         "/templates/**", "/static/**", "signup.html"
