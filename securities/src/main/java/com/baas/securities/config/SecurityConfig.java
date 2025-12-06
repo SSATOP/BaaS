@@ -1,6 +1,5 @@
 package com.baas.securities.config;
 
-import com.baas.securities.security.filter.JwtFilter;
 import com.baas.securities.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -8,64 +7,43 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtFilter jwtFilter;
-    private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOAuth2UserService customOAuth2UserService; // 뱅킹 서버에서 받아온 정보 처리기
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        // 1. 기본 설정
         http
-                .formLogin(AbstractHttpConfigurer::disable) // 기본 폼 로그인 끄기
-                .httpBasic(AbstractHttpConfigurer::disable) // HTTP Basic 인증 끄기
-                .csrf(AbstractHttpConfigurer::disable);     // CSRF 끄기
+                .csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable);
 
-        // 2. 세션 설정
-        http
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
-
-        // 3. URL 권한 설정
         http
                 .authorizeHttpRequests(auth -> auth
-                        // [중요] OAuth2 로그인 관련 경로와 정적 리소스 허용
-                        .requestMatchers("/login/**", "/oauth2/**", "/error", "/favicon.ico").permitAll()
-
-                        // 인증 없이 접근 가능한 API (로그인, 회원가입 등)
-                        .requestMatchers("/api/auth/**").permitAll()
-
-                        // WebSocket 관련 경로 허용
-                        .requestMatchers("/ws-stomp/**", "/ws-stomp-stock-order/**").permitAll()
-
-                        // 테스트용 경로 (필요하다면)
-                        .requestMatchers("/test/**").permitAll()
-
-                        // 그 외 모든 요청은 인증 필요
+                        // 1. 로그인, 정적 리소스, 인증 없이 갈 수 있는 곳 허용
+                        .requestMatchers("/", "/login/**", "/oauth2/**", "/error", "/favicon.ico").permitAll()
+                        // 2. 그 외에는 무조건 로그인 해야 함
                         .anyRequest().authenticated()
                 );
 
-        // 4. JWT 필터 추가 (UsernamePasswordAuthenticationFilter 앞에 실행)
-        http
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
-        // 5. OAuth2 로그인 설정
+        // ★ YML에 적은 설정을 여기서 활성화시킵니다!
         http
                 .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/oauth2/authorization/baas") // (선택) 로그인 시작 URL 명시
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService) // 뱅킹 서버에서 유저 정보 가져오는 서비스
+                                .userService(customOAuth2UserService) // ★ 여기서 DB 저장 로직 연결!
                         )
-                        .defaultSuccessUrl("/main", true) // 로그인 성공 시 이동할 곳 (true: 항상 이동)
-                        .failureUrl("/login?error=true")  // 로그인 실패 시 이동할 곳
+                        .successHandler((request, response, authentication) -> {
+                            // 로그인 성공 후 리다이렉트 할 경로 (예: 메인 페이지)
+                            response.sendRedirect("/");
+                            // 또는 프론트엔드 주소 (예: http://localhost:5173/success)
+                        })
                 );
 
         return http.build();

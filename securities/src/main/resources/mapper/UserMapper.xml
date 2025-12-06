@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.baas.securities.repository.dao.UserDao">
+
+    <select id="findByEmail" resultType="com.baas.securities.dto.UserDto">
+        SELECT
+            id,
+            email,
+            name,
+            role,
+            oauth_provider as oauthProvider
+        FROM users
+        WHERE email = #{email}
+    </select>
+
+    <insert id="save" parameterType="com.baas.securities.dto.UserDto" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (
+            email,
+            name,
+            role,
+            oauth_provider
+        ) VALUES (
+                     #{email},
+                     #{name},
+                     #{role},
+                     #{oauthProvider}
+                 )
+    </insert>
+
+</mapper>

@@ -1,5 +1,6 @@
 package com.baas.securities.service;
 
+import com.baas.securities.dto.UserDto;
 import com.baas.securities.repository.dao.UserDao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,36 +37,49 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private void processBankingUser(OAuth2User oAuth2User) {
         Map<String, Object> attributes = oAuth2User.getAttributes();
-        Map<String, Object> response = (Map<String, Object>) attributes.get("response");
 
-        if(response == null){
+        // 뱅킹팀의 응답 구조에 따라 response를 꺼내는 방식이 다를 수 있으므로 확인 필요
+        // (보통 네이버 등은 response 안에 담겨 오지만, 뱅킹팀 API 명세에 따라 attributes 바로 사용)
+        Map<String, Object> response = (Map<String, Object>) attributes.get("response");
+        if (response == null) {
             response = attributes;
         }
 
-        //  뱅킹팀이 보내주는 JSON 키값에 맞춰 수정해야 함
-        String email = (String) attributes.get("email");
-        String name = (String) attributes.get("name");
+        String email = (String) response.get("email");
+        String name = (String) response.get("name");
+
+        // 필수 정보가 없으면 로그 남기고 중단 (NullPointerException 방지)
+        if (email == null) {
+            log.error("OAuth2 로그인 실패: 이메일 정보가 없습니다. attributes={}", attributes);
+            return;
+        }
 
         log.info("뱅킹 로그인 시도: email={}, name={}", email, name);
 
-//        // 3. DB 저장/업데이트 로직 (UserDao 활용)
-//        // 예시 코드 (집에 가서 DB 연결되면 주석 풀고 완성하세요)
-//
-//        UserDto user = userDao.findByEmail(email);
-//        if (user == null) {
-//            // (A) DB에 없으면? -> 신규 회원가입 (INSERT)
-//            log.info("신규 회원입니다. 자동 회원가입 진행: {}", email);
-//            UserDto newUser = new UserDto();
-//            newUser.setEmail(email);
-//            newUser.setName(name);
-//            newUser.setRole("ROLE_USER");
-//            newUser.setOauthProvider("BAAS"); // 뱅킹에서 왔다는 표시
-//            userDao.save(newUser); // <-- 여기가 회원가입!
-//        } else {
-//            // (B) DB에 있으면? -> 그냥 통과 (로그인)
-//            log.info("기존 회원입니다. 로그인 처리: {}", email);
-//            // 필요하면 여기서 최근 접속일(last_login) 업데이트
-//        }
+        // 3. DB 저장/업데이트 로직
+        UserDto user = userDao.findByEmail(email);
 
-    }
-}
+        if (user == null) {
+            // (A) DB에 없으면 -> 신규 회원가입 (INSERT)
+            log.info("신규 회원 감지. 자동 회원가입 진행: {}", email);
+
+            UserDto newUser = new UserDto();
+            newUser.setEmail(email);
+            newUser.setName(name != null ? name : "이름없음"); // 이름 없을 경우 대비
+            newUser.setRole("ROLE_USER");
+            newUser.setOauthProvider("BAAS"); // 제공자 명시
+
+            // 필요하다면 비밀번호는 임의의 값이나 NULL로 처리 (OAuth 유저는 비번 불필요할 수 있음)
+            // newUser.setPassword("");
+
+            userDao.save(newUser);
+            log.info("회원가입 완료");
+        } else {
+            // (B) DB에 있으면 -> (선택) 정보 업데이트 or 로그인 로그 기록
+            log.info("기존 회원 로그인: {}", email);
+
+            // 예: 이름이 바뀌었을 수도 있으니 업데이트 (필요시 주석 해제)
+            // user.setName(name);
+            // userDao.update(user);
+        }
+    }}

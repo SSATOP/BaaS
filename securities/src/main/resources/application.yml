@@ -34,8 +34,8 @@ spring:
         registration:
           baas: # [식별자]
             client-name: "BaaS Banking Login"
-            client-id: "0f022a40-9f67-49e1-8639-e78a5da5be11"
-            client-secret: "secret"
+            client-id: "6a156572-ff0b-467b-80da-ddf4354b8727"
+            client-secret: "{noop}secret"
             redirect-uri: "http://localhost:8080/login/oauth2/code/baas"
             authorization-grant-type: authorization_code
             scope:
