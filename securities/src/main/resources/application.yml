@@ -9,7 +9,8 @@ spring:
     username: ${DATABASE_USERNAME}
 
 
-# 메일 설정
+
+  # 메일 설정
   mail:
     host: smtp.gmail.com
     port: 587
@@ -26,6 +27,8 @@ spring:
     redis:
       host: localhost
       port: 6379
+    mongodb:
+      uri: ${MONGODB_URI}
 
 
 mybatis:

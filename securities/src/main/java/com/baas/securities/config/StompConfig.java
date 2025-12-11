@@ -4,7 +4,6 @@ import com.baas.securities.exception.StompErrorHandler;
 import com.baas.securities.security.resolver.StompLoginAnnotationResolver;
 import com.baas.securities.ws.AuthStompHandler;
 import com.baas.securities.ws.DontNeedAuthInterceptor;
-import com.baas.securities.ws.StompPreHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
@@ -22,7 +21,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StompConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final StompPreHandler stompPreHandler;
     private final DontNeedAuthInterceptor dontNeedAuthInterceptor;
     private final AuthStompHandler authStompHandler;
 
@@ -73,7 +71,7 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(authStompHandler, stompPreHandler);
+        registration.interceptors(authStompHandler);
     }
 
     @Override

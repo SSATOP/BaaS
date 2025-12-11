@@ -36,7 +36,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
-    private final AbstractMessageSendingTemplate abstractMessageSendingTemplate;
+    private final HoldingService holdingService;
     /**
      *  송금 로직
      */
@@ -44,7 +44,7 @@ public class AccountService {
     @Transactional
     public TransferResDTO transfer(AuthUser user, TransferReqDTO dto) {
         // 1. 보내는 유저/ 계좌 확인
-        User findUser = userRepository.findByEmail(user.getEmail())
+        User sendUser = userRepository.findByEmail(user.getEmail())
                 .orElseThrow(()-> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         // todo : fromAccountNumber가 없으면 토큰 유저의 기본 계좌등을 찾는 로직 필요
@@ -53,15 +53,19 @@ public class AccountService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         // 2. 본인 계좌 확인
-        isUserAccount(findUser, fromAccount);
+        isUserAccount(sendUser, fromAccount);
 
         // 3. 이체 비밀 번호 확인
         validatePassword(fromAccount, dto.getTransferPassword());
 
+        // TODO: 이거는 우리 서비스 안에 계설된 계좌 확인만 가능한 것으로 생각됨. 따라서 나중에는 다른 은행에 있는 계좌 확인을 위한 처리도 필요하다고 생각됨.
         // 4. 받는 계좌 확인
         Account toAccount = accountRepository.findByAccountNumber(dto.getToAccountNumber())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
 
+        // 4.2 받는 계좌의 예금주 명 가져오기.
+        User receiveUser = userRepository.findById(toAccount.getUserId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         // 5. 자기 자신에게 송금하는 경우 방지
         if(fromAccount.getId().equals(toAccount.getId())){
@@ -82,7 +86,7 @@ public class AccountService {
         accountRepository.update(toAccount);
 
         // 9. 거래 내역 기록 (출금, 입금 둘다)
-        saveTransferTransaction(fromAccount, toAccount, dto.getAmount());
+        saveTransferTransaction(fromAccount, toAccount, dto.getAmount(), sendUser, receiveUser);
 
         log.info("송금 완료: {} -> {}, 금액: {}", fromAccount.getAccountNumber(), toAccount.getAccountNumber(), dto.getAmount());
 
@@ -91,8 +95,11 @@ public class AccountService {
 
     }
 
+    /**
+     * TODO: to_account_id, to_account_type을 상대 계좌를 표현할 새로운 이름의 필드로 바꿀 필요가 있어보임.
+     */
     // 송금 거래 기록 저장 로직(출금.입금 트랜잭션 2개 생성)
-    private void saveTransferTransaction(Account fromAccount, Account toAccount, BigDecimal amount) {
+    private void saveTransferTransaction(Account fromAccount, Account toAccount, BigDecimal amount, User sendUser, User receiveUser) {
         // 출금 기록 (보내는 사람 기준)
         Transaction withdrawal = Transaction.builder()
                 .accountId(fromAccount.getId())
@@ -101,8 +108,8 @@ public class AccountService {
                 .status(TransactionStatus.SUCCESS)
                 .createdAt(LocalDateTime.now())
                 .completedAt(LocalDateTime.now())
-                .toAccountId(toAccount.getId()) // 상대방 계좌 ID 기록
-                // .toAccountType(toAccount.getAccountType()) // 필요하다면 타입도 기록
+                .relativeAccountNumber(toAccount.getAccountNumber()) // 상대방 계좌 번호 기록
+                .relativeAccountUsername(receiveUser.getName()) // 상대방 이름 저장
                 .build();
         transactionRepository.save(withdrawal);
 
@@ -114,7 +121,8 @@ public class AccountService {
                 .status(TransactionStatus.SUCCESS)
                 .createdAt(LocalDateTime.now())
                 .completedAt(LocalDateTime.now())
-                // .fromAccountId(fromAccount.getId()) // 보낸 사람 ID 기록 (필요하다면)
+                .relativeAccountNumber(fromAccount.getAccountNumber())
+                .relativeAccountUsername(sendUser.getName())
                 .build();
         transactionRepository.save(deposit);
     }
@@ -144,7 +152,6 @@ public class AccountService {
                 break;
             default :
                 throw new BadRequestException(ErrorCode.INVALID_TRANSACTION_TYPE);
-
         }
 
         // 5. 거래 내역 기록
@@ -216,24 +223,29 @@ public class AccountService {
         FindAllAccountResDTO resDto = new FindAllAccountResDTO();
 
         allAccount.stream().forEach(account -> {
-            resDto.getAccounts().add(FindAccountResDTO.generate(account));
+            List<FindAccountResDTO.HoldingDTO> holdings = holdingService.findAllByAccountId(account.getId());
+
+
+            resDto.getAccounts().add(FindAccountResDTO.generate(account, holdings));
         });
 
         return resDto;
     }
 
-    public FindAccountResDTO findByAccountNumber(AuthUser user, FindAccountReqDTO dto)  {
+    public FindAccountResDTO findAccountDetail(AuthUser user, FindAccountReqDTO dto)  {
         User findUser = userRepository.findByEmail(user.getEmail())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         // 존재하는 계좌인지 확인.
-        Account findAccount = accountRepository.findByAccountNumber(dto.getAccountNumber())
+        Account findAccount = accountRepository.findById(dto.getAccountId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         // 계좌 비밀번호가 일치하는지 확인.
         validatePassword(findAccount, dto.getAccountPassword());
 
-        return FindAccountResDTO.generate(findAccount);
+        List<FindAccountResDTO.HoldingDTO> holdings = holdingService.findAllByAccountId(findAccount.getId());
+
+        return FindAccountResDTO.generate(findAccount, holdings);
     }
 
     private void isUserAccount(User user, Account account) {

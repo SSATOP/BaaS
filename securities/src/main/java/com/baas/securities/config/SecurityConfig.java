@@ -47,6 +47,7 @@ public class SecurityConfig {
                         // websocket 연결 허용
                         // 주식 주문 websocket 연결 허용
                         .requestMatchers("/ws-stomp/**", "/ws-stomp-stock-order/**").permitAll()
+                        .requestMatchers("/stock/period/**").permitAll()
                         .anyRequest().authenticated();
                 });
 
