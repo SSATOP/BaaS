@@ -10,23 +10,31 @@
             email,
             name,
             role,
-            oauth_provider as oauthProvider
-        FROM users
+            oauth_provider as oauthProvider,
+            oauth_id as oauthId,
+            phone_number as phoneNumber,
+            created_at as createdAt,
+            last_login as lastLogin  FROM users
         WHERE email = #{email}
     </select>
 
-    <insert id="save" parameterType="com.baas.securities.dto.UserDto" useGeneratedKeys="true" keyProperty="id">
+    <insert id="save" parameterType="com.baas.securities.dto.UserDto">
         INSERT INTO users (
-            email,
-            name,
-            role,
-            oauth_provider
-        ) VALUES (
-                     #{email},
-                     #{name},
-                     #{role},
-                     #{oauthProvider}
-                 )
+            id, email, name, role, oauth_provider, oauth_id, phone_number, created_at, last_login ) VALUES (
+                                                                                                               #{id}, #{email}, #{name}, #{role}, #{oauthProvider}, #{oauthId}, #{phoneNumber}, #{createdAt}, #{lastLogin} )
     </insert>
+
+    <update id="update" parameterType="com.baas.securities.dto.UserDto">
+        UPDATE users
+        SET
+            name = #{name},
+            role = #{role},
+            oauth_provider = #{oauthProvider},
+            oauth_id = #{oauthId},
+            phone_number = #{phoneNumber},
+            created_at = #{createdAt},
+            last_login = #{lastLogin}
+        WHERE id = #{id}
+    </update>
 
 </mapper>

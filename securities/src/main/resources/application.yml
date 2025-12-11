@@ -33,9 +33,10 @@ spring:
       client:
         registration:
           baas: # [식별자]
-            client-name: "BaaS Banking Login"
-            client-id: "6a156572-ff0b-467b-80da-ddf4354b8727"
-            client-secret: "{noop}secret"
+            client-name: "baas"
+            client-id: "4d8e7dfc-40d3-4423-8934-dffb8552c8b2"
+            client-secret: "secret"
+            client-authentication-method: client_secret_post
             redirect-uri: "http://localhost:8080/login/oauth2/code/baas"
             authorization-grant-type: authorization_code
             scope:
@@ -75,3 +76,5 @@ logging:
     jdbc.sqltiming: DEBUG
     jdbc.resultset: TRACE
     jdbc.audit: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web.client: DEBUG

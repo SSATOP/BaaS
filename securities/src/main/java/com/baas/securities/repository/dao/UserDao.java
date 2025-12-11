@@ -12,4 +12,6 @@ public interface UserDao  {
 
     // 회원 정보 저장 (회원가입)
     void save(UserDto userDto);
+
+    void update(UserDto userDto);
 }

@@ -1,7 +1,7 @@
 package com.baas.securities.service;
 
-import com.baas.securities.dto.UserDto;
-import com.baas.securities.repository.dao.UserDao;
+import com.baas.securities.repository.UserRepository;
+import com.baas.securities.repository.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -9,26 +9,30 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Map;
-
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
-    private final UserDao userDao;
+
+    // 1. UserDao 대신 UserRepository(인터페이스) 사용
+    private final UserRepository userRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        // 1. 뱅킹 서버에서 정보 가져오기
         OAuth2User oAuth2User = super.loadUser(userRequest);
         log.info("OAuth2 User Info: {}", oAuth2User.getAttributes());
 
-        // 2. 뱅킹 서비스인지 확인
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
-
-        if ("banking".equals(registrationId)) {
+        log.info("현재 요청된 RegistrationId: {}", registrationId);
+        // 뱅킹 서비스 연동일 경우 처리
+        if ("baas".equals(registrationId)) {
             processBankingUser(oAuth2User);
         }
 
@@ -38,8 +42,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private void processBankingUser(OAuth2User oAuth2User) {
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
-        // 뱅킹팀의 응답 구조에 따라 response를 꺼내는 방식이 다를 수 있으므로 확인 필요
-        // (보통 네이버 등은 response 안에 담겨 오지만, 뱅킹팀 API 명세에 따라 attributes 바로 사용)
+        // 뱅킹 API 응답 구조에 맞게 파싱
         Map<String, Object> response = (Map<String, Object>) attributes.get("response");
         if (response == null) {
             response = attributes;
@@ -47,8 +50,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String email = (String) response.get("email");
         String name = (String) response.get("name");
-
-        // 필수 정보가 없으면 로그 남기고 중단 (NullPointerException 방지)
+        String oauthId = (String) response.get("id");
+        String phoneNumber = (String) response.get("phoneNumber");
         if (email == null) {
             log.error("OAuth2 로그인 실패: 이메일 정보가 없습니다. attributes={}", attributes);
             return;
@@ -56,30 +59,38 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         log.info("뱅킹 로그인 시도: email={}, name={}", email, name);
 
-        // 3. DB 저장/업데이트 로직
-        UserDto user = userDao.findByEmail(email);
+        // 2. UserRepository를 통해 조회 (반환 타입 Optional<User>)
+        Optional<User> userOptional = userRepository.findByEmail(email);
 
-        if (user == null) {
-            // (A) DB에 없으면 -> 신규 회원가입 (INSERT)
+        if (userOptional.isEmpty()) {
+            // (A) 신규 회원가입
             log.info("신규 회원 감지. 자동 회원가입 진행: {}", email);
 
-            UserDto newUser = new UserDto();
-            newUser.setEmail(email);
-            newUser.setName(name != null ? name : "이름없음"); // 이름 없을 경우 대비
-            newUser.setRole("ROLE_USER");
-            newUser.setOauthProvider("BAAS"); // 제공자 명시
+            // User 엔티티 빌더 사용
+            // id는 User 클래스 생성자에서 UUID로 자동 생성되므로 넣지 않음
+            User newUser = User.builder()
+                    .email(email)
+                    .name(name != null ? name : "이름없음")
+                    .role("ROLE_USER")
+                    .oauthProvider("BAAS") // 또는 "BANKING" 등 식별자
+                    .phoneNumber(phoneNumber)
+                    .oauthId(oauthId)
+                    .createdAt(LocalDateTime.now()) // 생성 시간
+                    .lastLogin(LocalDateTime.now()) // 마지막 로그인 시간
+                    .build();
 
-            // 필요하다면 비밀번호는 임의의 값이나 NULL로 처리 (OAuth 유저는 비번 불필요할 수 있음)
-            // newUser.setPassword("");
-
-            userDao.save(newUser);
+            userRepository.save(newUser);
             log.info("회원가입 완료");
+
         } else {
-            // (B) DB에 있으면 -> (선택) 정보 업데이트 or 로그인 로그 기록
+            // (B) 기존 회원 로그인
             log.info("기존 회원 로그인: {}", email);
 
-            // 예: 이름이 바뀌었을 수도 있으니 업데이트 (필요시 주석 해제)
-            // user.setName(name);
-            // userDao.update(user);
+            User existingUser = userOptional.get();
+
+            // 로그인 시간 업데이트 등 필요한 로직이 있다면 여기서 처리
+            existingUser.setLastLogin(LocalDateTime.now());
+            userRepository.save(existingUser);
         }
-    }}
+    }
+}
