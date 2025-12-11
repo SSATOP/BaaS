@@ -42,7 +42,8 @@ public class OrderService {
         // step1. 계좌 확인
         String accountNumber = dto.getAccountNumber();
         // 빈 객체일시 예외를 던짐
-        Account account = accountRepository.findByAccountNumber(accountNumber).orElseThrow(() -> new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         // step2-1. 주문 가능 확인 : 종목 존재 확인
         validateSymbol(dto.getTicker());
@@ -65,11 +66,12 @@ public class OrderService {
         accountRepository.update(account);
 
         // 6 - 1 : 종목을 보유하고 있으면 기존의 보유 종목 반환, 아니라면 새로 생성해서 반환.
-        Holdings holdings = holdingsRepository.findByUserIdAndTicker(infoDto.getUserId(), dto.getTicker())
-                .orElseGet(() -> generateHoldings(dto, infoDto));
+        Holdings holdings = holdingsRepository.findByAccountIdAndTicker(account.getId(), dto.getTicker())
+                .orElseGet(() -> generateHoldings(dto, infoDto, account));
 
-//        holdingsRepository.save(holdings); // mybatis 땐 모든 수정사항 후에 save
         //step 6 : 보유종목 추가(dto에서 주문량 가져올지 order에서 가져올지 묻기)
+        holdings.updateAvgPrice(order.getQuantity(), order.getPrice());
+
         holdings.updateQuantity(holdings.getQuantity() + dto.getQuantity());
 
         holdingsRepository.save(holdings); // mybatis 땐 모든 수정사항 후에 save
@@ -90,7 +92,7 @@ public class OrderService {
         validateSymbol(dto.getTicker());
 
         // step3: 보유종목 생성 -> 생성이 아니라 찾는걸로
-        Holdings holdings = holdingsRepository.findByUserIdAndTicker(infoDto.getUserId(), dto.getTicker())
+        Holdings holdings = holdingsRepository.findByAccountIdAndTicker(account.getId(), dto.getTicker())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.STOCK_HOLDING_NOT_FOUND));
 
         // step4-1.주문 수량 확인
@@ -131,13 +133,13 @@ public class OrderService {
     }
 
 
-    private Holdings generateHoldings(StockOrderDTO dto, AccIdUserIdInfoDTO infoDTO){
+    private Holdings generateHoldings(StockOrderDTO dto, AccIdUserIdInfoDTO infoDTO, Account account){
         return Holdings.builder()
                 .symbol(dto.getTicker())
-                .userId(infoDTO.getUserId())
+                .accountId(account.getId())
+                .avgPrice(0.0)
+                .profitLoss(0.0)
                 .quantity(0L)
-//                .avgPrice()
-//                .profitLoss()
                 .lastUpdated(LocalDateTime.now())
                 .build();
     }

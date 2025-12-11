@@ -2,6 +2,7 @@ package com.baas.securities.ws;
 
 import com.baas.securities.dto.stock.RealtimeStockDTO;
 import com.baas.securities.repository.KisSocketRepository;
+import com.baas.securities.repository.RealtimeStockPriceRepository;
 import com.baas.securities.util.WebSocketMessageMaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,10 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,11 +32,19 @@ public class KisWebSocketHandler extends TextWebSocketHandler {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final KisSocketRepository kisRepository;
     private final WebSocketMessageMaker messageMaker;
+    private final RealtimeStockPriceRepository realtimeStockPriceRepository;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String kisSessionId = session.getId();
         kisRepository.setKisSession(session);
+
+        String samsung = messageMaker.buildSubRequest("005930", kisRepository.getApprovalKey());
+        session.sendMessage(new TextMessage(samsung));
+
+        String sk = messageMaker.buildSubRequest("000660", kisRepository.getApprovalKey());
+        System.out.println(sk);
+        session.sendMessage(new TextMessage(sk));
 
         recoverKISSub(session);
 
@@ -52,9 +65,13 @@ public class KisWebSocketHandler extends TextWebSocketHandler {
         if (isPingPongMsg(msg)) {
             String pingPongMsg = messageMaker.makePingPongMsg();
             session.sendMessage(new TextMessage(pingPongMsg));
-            log.info("send ping pong msg in KisWebSocketHandler.handleTextMessage, session id={}", session.getId());
+//            log.info("send ping pong msg in KisWebSocketHandler.handleTextMessage, session id={}", session.getId());
             return;
         }
+
+        /**
+         * TODO: kis 서버에서 종목에 대한 연결을 끊었을 때의 로직도 생각해야함.
+         */
 
         /**
          * KIS 서버의 응답 메시지 파싱
@@ -66,6 +83,7 @@ public class KisWebSocketHandler extends TextWebSocketHandler {
             List<RealtimeStockDTO> dtos = getResMessages(stockInfo);
             for (RealtimeStockDTO dto : dtos) {
                 simpMessagingTemplate.convertAndSend("/sub/stock/" + dto.getTicker(), dto);
+                realtimeStockPriceRepository.save(dto.toEntity());
 //                log.info("dest: {}, send message: {}", "/sub/stock/" + dto.getTicker(), dto.getTicker());
             }
         }
@@ -119,7 +137,7 @@ public class KisWebSocketHandler extends TextWebSocketHandler {
     private RealtimeStockDTO generateRealtimeStockDTO(String[] stockInfo, int startIdx) {
         return RealtimeStockDTO.builder()
                 .ticker(extractTicker(stockInfo[startIdx]))
-                .tradeTime(formatTradeTime(stockInfo[startIdx + 1]))
+                .tradeTime(stringFormattingTradeTime(stockInfo[startIdx + 1]))
                 .price(Double.parseDouble(stockInfo[startIdx + 2]))
                 .change(new BigInteger(stockInfo[startIdx + 4]))
                 .changeRate(new BigDecimal(stockInfo[startIdx + 5]))
@@ -140,9 +158,11 @@ public class KisWebSocketHandler extends TextWebSocketHandler {
         return infos[3];
     }
 
-    private String formatTradeTime(String time) {
+    private String stringFormattingTradeTime(String time) {
         return "%s:%s:%s".formatted(time.substring(0, 2), time.substring(2, 4), time.substring(4, 6));
     }
+
+
 
     private boolean isPingPongMsg(String msg) {
         return msg.contains("PINGPONG");

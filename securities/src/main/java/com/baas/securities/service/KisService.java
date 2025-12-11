@@ -6,6 +6,7 @@ import com.baas.securities.repository.KisSocketRepository;
 import com.baas.securities.util.WebSocketMessageMaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 
@@ -20,6 +21,8 @@ public class KisService {
      */
     private final KisSocketRepository kisRepository;
     private final WebSocketMessageMaker messageMaker;
+
+
 
     /**
      *
@@ -36,7 +39,6 @@ public class KisService {
 
         try {
             kisRepository.getKisSession()
-
                     .orElseThrow(() -> new InternalServerErrorException(ErrorCode.STREAM_ERROR))
                     .sendMessage(new TextMessage(reqMsg));
 

@@ -23,7 +23,7 @@ import java.util.List;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtHandler jwtHandler;
-    private final List<String> NOT_NEED_VALID = List.of("/login", "/ws-stomp");
+    private final List<String> NOT_NEED_VALID = List.of("/login", "/ws-stomp", "/stock/period");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {

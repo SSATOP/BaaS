@@ -4,6 +4,7 @@ package com.baas.securities.repository;
 import com.baas.securities.repository.entity.Account;
 import com.baas.securities.repository.entity.Holdings;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface HoldingsRepository {
@@ -11,7 +12,9 @@ public interface HoldingsRepository {
 
     void save(Holdings holdings);
 
-    Optional<Holdings> findByUserIdAndTicker(String userId, String ticker);
+    Optional<Holdings> findByAccountIdAndTicker(String accountId, String ticker);
 
     void deleteById(String id);
+
+    List<Holdings> findAllByAccountId(String accountId);
 }

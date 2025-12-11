@@ -36,7 +36,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
-    private final AbstractMessageSendingTemplate abstractMessageSendingTemplate;
+    private final HoldingService holdingService;
     /**
      *  송금 로직
      */
@@ -223,24 +223,29 @@ public class AccountService {
         FindAllAccountResDTO resDto = new FindAllAccountResDTO();
 
         allAccount.stream().forEach(account -> {
-            resDto.getAccounts().add(FindAccountResDTO.generate(account));
+            List<FindAccountResDTO.HoldingDTO> holdings = holdingService.findAllByAccountId(account.getId());
+
+
+            resDto.getAccounts().add(FindAccountResDTO.generate(account, holdings));
         });
 
         return resDto;
     }
 
-    public FindAccountResDTO findByAccountNumber(AuthUser user, FindAccountReqDTO dto)  {
+    public FindAccountResDTO findAccountDetail(AuthUser user, FindAccountReqDTO dto)  {
         User findUser = userRepository.findByEmail(user.getEmail())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         // 존재하는 계좌인지 확인.
-        Account findAccount = accountRepository.findByAccountNumber(dto.getAccountNumber())
+        Account findAccount = accountRepository.findById(dto.getAccountId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         // 계좌 비밀번호가 일치하는지 확인.
         validatePassword(findAccount, dto.getAccountPassword());
 
-        return FindAccountResDTO.generate(findAccount);
+        List<FindAccountResDTO.HoldingDTO> holdings = holdingService.findAllByAccountId(findAccount.getId());
+
+        return FindAccountResDTO.generate(findAccount, holdings);
     }
 
     private void isUserAccount(User user, Account account) {

@@ -1,7 +1,7 @@
 package com.baas.securities.repository;
 
 import com.baas.securities.enums.OrderStatus;
-import com.baas.securities.enums.TickerDummy;
+import com.baas.securities.enums.Ticker;
 import com.baas.securities.enums.TransactionType;
 import com.baas.securities.repository.entity.Order;
 import org.junit.jupiter.api.DisplayName;
@@ -11,8 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class OrderRepositoryTest {
@@ -32,7 +30,7 @@ class OrderRepositoryTest {
                 .quantity(10L)
                 .orderStatus(OrderStatus.SUCCESS)
                 .createdAt(LocalDateTime.now())
-                .symbol(TickerDummy.SK.getName())
+                .symbol(Ticker.SK.getName())
                 .build();
         // when
         orderRepository.save(order);

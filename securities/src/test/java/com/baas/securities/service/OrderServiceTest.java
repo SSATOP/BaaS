@@ -2,16 +2,13 @@ package com.baas.securities.service;
 
 import com.baas.securities.dto.AccIdUserIdInfoDTO;
 import com.baas.securities.dto.stock.StockOrderDTO;
-import com.baas.securities.enums.OrderStatus;
-import com.baas.securities.enums.TickerDummy;
+import com.baas.securities.enums.Ticker;
 import com.baas.securities.enums.TransactionType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class OrderServiceTest {
@@ -36,7 +33,7 @@ class OrderServiceTest {
         // "user2@gmail.com", "867-859-577865"
         StockOrderDTO dto = new StockOrderDTO();
         dto.setOrderType(TransactionType.BUY.name());
-        dto.setTicker(TickerDummy.SS.getName());
+        dto.setTicker(Ticker.SS.getName());
         dto.setPrice(1000d);
         dto.setQuantity(2L);
         dto.setCurrentType("원화");
@@ -56,7 +53,7 @@ class OrderServiceTest {
         // given
         StockOrderDTO dto = new StockOrderDTO();
         dto.setOrderType(TransactionType.SELL.name());
-        dto.setTicker(TickerDummy.SS.getName());
+        dto.setTicker(Ticker.SS.getName());
         dto.setPrice(1500d);
         dto.setQuantity(2L);
         dto.setCurrentType("원화");
