@@ -1,20 +1,19 @@
 package com.baas.securities.repository.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@ToString
 public class Holdings {
     private String id;
     private String symbol;
-    private String userId;
+    private String accountId;
     private Long quantity;
     private Double avgPrice;
     private Double profitLoss;
@@ -22,9 +21,9 @@ public class Holdings {
 
 
     @Builder
-    public Holdings(String symbol, String userId, Long quantity, Double avgPrice, Double profitLoss, LocalDateTime lastUpdated) {
+    public Holdings(String symbol, String accountId, Long quantity, Double avgPrice, Double profitLoss, LocalDateTime lastUpdated) {
         this.symbol = symbol;
-        this.userId = userId;
+        this.accountId = accountId;
         this.quantity = quantity;
         this.avgPrice = avgPrice;
         this.profitLoss = profitLoss;
@@ -35,5 +34,15 @@ public class Holdings {
     public void updateQuantity(Long quantity){
         this.quantity = quantity;
         this.lastUpdated = LocalDateTime.now();
+    }
+
+    public void updateAvgPrice(Long quantity, BigDecimal curPrice) {
+        double have = avgPrice * this.quantity;
+
+        this.avgPrice = curPrice
+                .multiply(new BigDecimal(quantity))
+                .add(new BigDecimal(have))
+                .divide(new BigDecimal(this.quantity + quantity))
+                .doubleValue();
     }
 }

@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 @Qualifier("KisSocketRepository")
 public class KisSocketRepositoryImpl implements KisSocketRepository {
 
-    //    @Value("${KIS_WEBSOCKET_APPROVAL_KEY}")
-    private String approvalKey="faesfasdfasdf";
+    @Value("${KIS_WEBSOCKET_KEY}")
+    private String approvalKey;
 
     // ---  2. 기존 Map 변수들(users, store, infos) 삭제  ---
     // private final Map<String, String> users = ... (삭제)

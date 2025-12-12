@@ -73,10 +73,10 @@ public class AccountController {
     public ResponseDTO processTransaction(
             @Login AuthUser user,
             @PathVariable String accountId,
-            @RequestBody TransactionReqDTO dto){
+            @RequestBody TransactionReqDTO dto) {
         log.info("TRANSACTION user={}, accountId={}, type={}, amount={}", user.getEmail(), accountId, dto.getTransactionType(), dto.getAmount());
         TransactionResDTO resDTO = accountService.processTransaction(user, accountId, dto);
-        return new ResponseDTO(HttpStatus.OK,"처리 완료",resDTO);
+        return new ResponseDTO(HttpStatus.OK, "처리 완료", resDTO);
     }
 
     @PostMapping("/transfer")
@@ -86,7 +86,22 @@ public class AccountController {
 
         TransferResDTO resDTO = accountService.transfer(user, dto);
         return new ResponseDTO(HttpStatus.OK, "송금이 완료되었습니다.", resDTO);
+    }
 
+    /**
+     * 잔고 조회: 주식 데이터까지 불러와서 합쳐야 함.
+     * <p>
+     * account의 balance에는 일단 주식을 제외한 보유한 현금을 저장.
+     * 현금에다가 보유 주식 종목의 현재가격을 더해 반환.
+     * <p>
+     * 보유 주식 현재가를 어떻게 가지고 올건데? => 사용자가 요청할 때마다 api -> 요청이 많다고 생각할때 비용이 많이듬.
+     * -> 소켓에서 모든 주식 정보를 받으면서 우리 db ( nosql ) 에 저장한 다음. 이 정보를 활용. -> 추가적인 구현이 들어감.
+     */
+    @GetMapping("/{id}")
+    public ResponseDTO findOne(@Login AuthUser user, @ModelAttribute FindAccountReqDTO dto, @PathVariable String id) {
+        dto.setAccountId(id);
 
+        FindAccountResDTO resData = accountService.findAccountDetail(user, dto);
+        return new ResponseDTO(HttpStatus.OK, "계좌 상세 조회 성공", resData);
     }
 }

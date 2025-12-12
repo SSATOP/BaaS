@@ -72,7 +72,7 @@ public enum ErrorCode {
     STOCK_NOT_FOUND_ORDER(HttpStatus.NOT_FOUND, "STOCK_NOT_FOUND", "해당 종목을 찾을 수 없습니다."), // (주문 시 종목 존재 여부)
     STOCK_HOLDING_NOT_FOUND(HttpStatus.NOT_FOUND, "STOCK_HOLDING_NOT_FOUND", "판매할 보유 종목을 찾을 수 없습니다."), // (매도 시 보유 여부)
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "ORDER_NOT_FOUND", "주문 내역이 존재하지 않습니다."),
-    TICKER_NOT_FOUND(HttpStatus.NOT_FOUND, "TICKER_NOT_FOUND", "요청한 종목의 실시간 시세를 찾을 수 없습니다."),
+    TICKER_NOT_FOUND(HttpStatus.NOT_FOUND, "TICKER_NOT_FOUND", "요청한 종목의 시세를 찾을 수 없습니다."),
 
 
     // 409 CONFLICT (충돌)

@@ -22,11 +22,11 @@ public class Transaction {
     private String failReason;        // 실패 이유
     private LocalDateTime createdAt;  // 생성일
     private LocalDateTime completedAt;// 완료일
-    private String toAccountId;       // 송금 목표 계좌 아이디
-    private String toAccountType;     // 송금 목표 계좌 유형
+    private String relativeAccountNumber;       // 송금 목표 계좌 번호
+    private String relativeAccountUsername;     // 송금 목표 계좌 예금주
 
     @Builder
-    public Transaction(String orderId, String accountId, TransactionType transactionType, BigDecimal amount, TransactionStatus status, String failReason, LocalDateTime createdAt, LocalDateTime completedAt, String toAccountId, String toAccountType) {
+    public Transaction(String orderId, String accountId, TransactionType transactionType, BigDecimal amount, TransactionStatus status, String failReason, LocalDateTime createdAt, LocalDateTime completedAt, String relativeAccountNumber, String relativeAccountUsername) {
         this.orderId = orderId;
         this.accountId = accountId;
         this.transactionType = transactionType;
@@ -35,8 +35,8 @@ public class Transaction {
         this.failReason = failReason;
         this.createdAt = createdAt;
         this.completedAt = completedAt;
-        this.toAccountId = toAccountId;
-        this.toAccountType = toAccountType;
+        this.relativeAccountNumber = relativeAccountNumber;
+        this.relativeAccountUsername = relativeAccountUsername;
         id = UUID.randomUUID().toString();
     }
 }

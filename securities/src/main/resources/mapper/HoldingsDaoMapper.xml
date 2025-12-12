@@ -6,8 +6,8 @@
     </select>
 
     <insert id="save">
-        insert into holdings (id, symbol, user_id, quantity, avg_price, profit_loss, last_updated)
-            values (#{id}, #{symbol}, #{userId}, #{quantity}, #{avgPrice}, #{profitLoss} ,#{lastUpdated})
+        insert into holdings (id, symbol, account_id, quantity, avg_price, profit_loss, last_updated)
+            values (#{id}, #{symbol}, #{accountId}, #{quantity}, #{avgPrice}, #{profitLoss} ,#{lastUpdated})
         on duplicate key update
         quantity = #{quantity},
         avg_price = #{avgPrice},
@@ -15,10 +15,16 @@
         last_updated = #{lastUpdated};
     </insert>
 
-    <select id="findByUserIdAndTicker" resultType="Holdings">
-        select id, symbol, user_id, quantity, avg_price, profit_loss, last_updated
+    <select id="findByAccountIdAndTicker" resultType="Holdings">
+        select id, symbol, account_id, quantity, avg_price, profit_loss, last_updated
         from holdings
-        where symbol = #{ticker} and user_id = #{userId};
+        where symbol = #{ticker} and account_id = #{accountId};
+    </select>
+
+    <select id="findAllByAccountId" resultType="Holdings">
+        select *
+        from holdings
+        where account_id = #{accountId};
     </select>
 
     <delete id="deleteById">

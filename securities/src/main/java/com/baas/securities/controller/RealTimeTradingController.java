@@ -4,6 +4,8 @@ import com.baas.securities.dto.AccIdUserIdInfoDTO;
 import com.baas.securities.dto.security.AuthUser;
 import com.baas.securities.dto.stock.OrderResDTO;
 import com.baas.securities.dto.ResponseDTO;
+import com.baas.securities.dto.stock.PeriodStockPriceDTO;
+import com.baas.securities.dto.stock.PeriodStockRequestDTO;
 import com.baas.securities.dto.stock.StockOrderDTO;
 import com.baas.securities.exception.ErrorCode;
 import com.baas.securities.exception.ex.BadRequestException;
@@ -12,6 +14,7 @@ import com.baas.securities.security.resolver.Login;
 import com.baas.securities.service.AccountService;
 import com.baas.securities.service.KisService;
 import com.baas.securities.service.OrderService;
+import com.baas.securities.service.PeriodHttpService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,8 +27,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -35,9 +37,8 @@ import java.security.Principal;
 @Slf4j
 public class RealTimeTradingController {
     private final OrderService orderService;
-    private final KisService kisService;
-
     private final AccountService accountService;
+    private final PeriodHttpService periodHttpService;
 
     /**
      * SEC_10_11 : 매수 매도
@@ -71,7 +72,16 @@ public class RealTimeTradingController {
         return generateResponseDto(HttpStatus.CREATED, "접수 완료", orderResDTO);
     }
 
-    public ResponseDTO generateResponseDto(HttpStatus status, String message, OrderResDTO orderResDTO){
+    @GetMapping("/stock/period/{ticker}")
+    public ResponseDTO getPeriodData(@PathVariable String ticker,
+                                     @ModelAttribute PeriodStockRequestDTO dto) {
+        dto.setTicker(ticker);
+        PeriodStockPriceDTO resData = periodHttpService.getPeriodPrice(dto);
+
+        return generateResponseDto(HttpStatus.OK, "조회 완료", resData);
+    }
+
+    private ResponseDTO generateResponseDto(HttpStatus status, String message, Object orderResDTO) {
         return ResponseDTO.builder()
                 .status(status)
                 .message(message)
@@ -85,10 +95,9 @@ public class RealTimeTradingController {
      * 구독 해지 로직은 ChanelInterceptor 에서 진행.
      */
     // stomppreHandler가 이 역할 대신하며, race condition 유발할까봐 주석 처리
-//    @MessageMapping("/stock/{ticker}")
-//    public void subRealtimeStockInfo(StompHeaderAccessor accessor, @DestinationVariable String ticker) throws IOException {
-//        log.info("sub stomp: session id={}, ticker={}", accessor.getSessionId(), ticker);
-//        String sessionId = accessor.getSessionId();
-//        kisService.subRealtimeStock(sessionId, ticker);
-//    }
+    @MessageMapping("/stock/{ticker}")
+    public void subRealtimeStockInfo(StompHeaderAccessor accessor, @DestinationVariable String ticker) throws IOException {
+        log.info("sub stomp: session id={}, ticker={}", accessor.getSessionId(), ticker);
+        String sessionId = accessor.getSessionId();
+    }
 }

@@ -40,7 +40,9 @@ public class WebSocketMessageMaker {
         Map<String, Object> body = new HashMap<>();
         Map<String, String> input = new  HashMap<>();
 
-        input.put("tr_id", "H0UNCNT0");
+
+//                H0UNCNT0
+        input.put("tr_id", "H0STCNT0");
         input.put("tr_key", ticker);
 
         body.put("input", input);

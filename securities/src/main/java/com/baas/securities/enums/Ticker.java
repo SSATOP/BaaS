@@ -1,10 +1,10 @@
 package com.baas.securities.enums;
 
-public enum TickerDummy {
+public enum Ticker {
     SS("005930"),SK("000660");
     private String name;
 
-    TickerDummy(String name) {
+    Ticker(String name) {
         this.name = name;
     }
 
@@ -12,8 +12,8 @@ public enum TickerDummy {
         return name;
     }
 
-    public static TickerDummy getCode(String name){
-        for(TickerDummy t : TickerDummy.values()){
+    public static Ticker getCode(String name){
+        for(Ticker t : Ticker.values()){
             if(t.getName().equals(name)){
                 return t;
             }

@@ -54,6 +54,9 @@ dependencies {
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+	// mongodb
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
     // oauth
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 }

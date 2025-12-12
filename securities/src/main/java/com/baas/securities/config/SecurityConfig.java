@@ -1,5 +1,6 @@
 package com.baas.securities.config;
-
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import com.baas.securities.security.filter.JwtFilter;
 import com.baas.securities.service.CustomOAuth2UserService;
 import com.baas.securities.ws.OAuth2LoginSuccessHandler;
 import lombok.RequiredArgsConstructor;
@@ -15,38 +16,46 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final JwtFilter jwtFilter;
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-
-    // ★ 2단계에서 만든 클래스 주입!
+    private final  OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
+                // 1. 비활성화 설정 (충돌 해결 완료)
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable);
+                .httpBasic(AbstractHttpConfigurer::disable)
 
-        http
+                // 2. 권한 설정 통합 및 세션 관리 (한 번만 호출해야 함)
                 .authorizeHttpRequests(auth -> auth
+                        // OAuth 경로 (나의 브랜치)
                         .requestMatchers("/", "/login/**", "/oauth2/**", "/error", "/favicon.ico").permitAll()
-                        .anyRequest().authenticated()
-                );
 
-        http
+                        // API 및 웹소켓 경로 (원본 브랜치)
+                        .requestMatchers("/api/auth").permitAll()
+                        .requestMatchers("/ws-stomp/**", "/ws-stomp-stock-order/**").permitAll()
+                        .requestMatchers("/stock/period/**").permitAll()
+
+                        // 나머지 요청은 인증 필요
+                        .anyRequest().authenticated()
+                )
+
+                // 3. 필터 및 OAuth2 설정 (체인 연결)
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) // 💡 세미콜론 제거
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/oauth2/authorization/baas")
-                        // ★ [친구분이 말한 부분 추가]
                         .authorizationEndpoint(authorization -> authorization
-                                // 이제 세션 대신 쿠키에 저장하므로 세션이 끊겨도 안전합니다.
-                                .authorizationRequestRepository(cookieAuthorizationRequestRepository)
+
+                                 .authorizationRequestRepository(cookieAuthorizationRequestRepository)
                         )
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
+                                .userService(customOAuth2UserService) // customOAuth2UserService 주입 필요
                         )
-                        .successHandler(oAuth2LoginSuccessHandler)
+                        .successHandler(oAuth2LoginSuccessHandler) // oAuth2LoginSuccessHandler 주입 필요
                 );
 
         return http.build();
