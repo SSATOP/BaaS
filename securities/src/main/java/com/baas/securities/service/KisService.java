@@ -4,13 +4,27 @@ import com.baas.securities.exception.ErrorCode;
 import com.baas.securities.exception.ex.InternalServerErrorException;
 import com.baas.securities.repository.KisSocketRepository;
 import com.baas.securities.util.WebSocketMessageMaker;
+import com.baas.securities.ws.KisWebSocketHandler;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.TextMessage;
-
+import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
+import org.springframework.beans.factory.ObjectProvider;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -21,8 +35,6 @@ public class KisService {
      */
     private final KisSocketRepository kisRepository;
     private final WebSocketMessageMaker messageMaker;
-
-
 
     /**
      *
@@ -39,6 +51,7 @@ public class KisService {
 
         try {
             kisRepository.getKisSession()
+
                     .orElseThrow(() -> new InternalServerErrorException(ErrorCode.STREAM_ERROR))
                     .sendMessage(new TextMessage(reqMsg));
 

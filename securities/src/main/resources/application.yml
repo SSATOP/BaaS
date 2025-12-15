@@ -31,6 +31,36 @@ spring:
       uri: ${MONGODB_URI}
 
 
+  security:
+    oauth2:
+      client:
+        registration:
+          baas: # [식별자]
+            client-name: "baas"
+            client-id: "4d8e7dfc-40d3-4423-8934-dffb8552c8b2"
+            client-secret: "secret"
+            client-authentication-method: client_secret_post
+            redirect-uri: "http://localhost:8080/login/oauth2/code/baas"
+            authorization-grant-type: authorization_code
+            scope:
+              - profile
+              - email
+              - phone
+            provider: baas # 아래 provider 설정과 연결
+
+        provider:
+          baas: # [식별자]
+            # 1. 인증 서버 (로그인 화면, 토큰 발급) -> 포트 9000
+            authorization-uri: http://localhost:9000/oauth2/authorize
+            token-uri: http://localhost:9000/oauth2/token
+            jwk-set-uri: http://localhost:9000/oauth2/jwks
+
+            # 2. 리소스 서버 (유저 정보 조회) -> 포트 9001
+            user-info-uri: http://localhost:9001/me
+
+            # 3. 유저 식별자 키값
+            user-name-attribute: response
+
 mybatis:
   type-aliases-package: com.baas.securities.repository.entity
   configuration:
@@ -49,3 +79,5 @@ logging:
     jdbc.sqltiming: DEBUG
     jdbc.resultset: TRACE
     jdbc.audit: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web.client: DEBUG

@@ -32,4 +32,6 @@ public interface KisSocketRepository {
     String getApprovalKey();
 
     void updateApprovalKey(String newApprovalKey);
+    // 소켓 강제로 끊는 메소드 추가
+    void disconnect();
 }
